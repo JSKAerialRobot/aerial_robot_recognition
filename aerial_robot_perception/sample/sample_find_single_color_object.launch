@@ -1,0 +1,42 @@
+<launch>
+  <arg name="input_image" default="/downward_camera/image"/>
+  <arg name="gui" default="True"/>
+
+  <include file="$(find aerial_robot_perception)/launch/find_single_color_object.launch">
+    <arg name="image_topic" value="$(arg input_image)"/>
+    <arg name="camera_info_topic" value="/downward_camera/camera_info"/>
+    <arg name="debug_view" value="true"/>
+    <arg name="output_screen" value="false"/>
+  </include>
+
+  <node name="apply_mask_image"
+        pkg="jsk_perception" type="apply_mask_image">
+    <remap from="~input" to="$(arg input_image)" />
+    <remap from="~input/mask" to="find_object_with_size_filter/debug_image" />
+    <rosparam>
+      clip: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="$(arg input_image)" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/hsv_color_filter/image" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="apply_mask_image/output"/>
+    </node>
+  </group>
+
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(find aerial_robot_perception)/sample/data/2018-06-25-21-21-10_uav_with_red_object.bag --clock -l">
+  </node>
+
+  <node name="tf_echo" pkg="tf" type="tf_echo" args="/world /target_object" output="screen"/>
+
+</launch>
