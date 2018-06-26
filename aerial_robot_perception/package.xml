@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>aerial_robot_perception</name>
+  <version>0.0.0</version>
+  <description>The aerial_robot_perception package</description>
+
+  <maintainer email="chou@jsk.imi.i.u-tokyo.ac.jp">Moju Zhao</maintainer>
+  <maintainer email="anzai@jsk.imi.i.u-tokyo.ac.jp">Tomoki Anzai</maintainer>
+  <license>BSD</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>cv_bridge</depend>
+  <depend>geometry_msgs</depend>
+  <depend>jsk_topic_tools</depend>
+  <depend>nav_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>nodelet</depend>
+  <depend>image_view</depend>
+  <depend>jsk_perception</depend>
+
+  <export>
+    <nodelet plugin="${prefix}/plugins/nodelet/aerial_robot_perception_nodelet.xml"/>
+  </export>
+</package>
