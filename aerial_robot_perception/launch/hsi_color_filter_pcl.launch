@@ -1,0 +1,50 @@
+<launch>
+  <arg name="input" default="/camera/depth_registered/points"/>
+  <arg name="DEFAULT_NAMESPACE" default="/"/>
+  <arg name="create_manager" default="true"/>
+  <arg name="manager" default="hsi_filter_manager"/>
+
+  <arg name="h_max" default="127"/>
+  <arg name="h_min" default="-128"/>
+  <arg name="s_max" default="255"/>
+  <arg name="s_min" default="0"/>
+  <arg name="i_max" default="255"/>
+  <arg name="i_min" default="0"/>
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet" name="hsi_color_filter"
+          args="load jsk_pcl/HSIColorFilter $(arg manager)">
+      <remap from="~input" to="$(arg input)"/>
+      <param name="h_limit_max" value="$(arg h_max)" />
+      <param name="h_limit_min" value="$(arg h_min)" />
+      <param name="s_limit_max" value="$(arg s_max)" />
+      <param name="s_limit_min" value="$(arg s_min)" />
+      <param name="i_limit_max" value="$(arg i_max)" />
+      <param name="i_limit_min" value="$(arg i_min)" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+          args="load jsk_pcl/EuclideanClustering $(arg manager)"
+          output="screen">
+      <remap from="~input" to="hsi_color_filter/output" />
+      <rosparam>
+        tolerance: 0.02
+        min_size: 100
+      </rosparam>
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="cluster_decomposer"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)"
+          output="screen">
+      <remap from="~input" to="hsi_color_filter/output" />
+      <remap from="~target" to="euclidean_clustering/output" />
+      <rosparam>
+        ~sort_by: z_axis
+      </rosparam>
+    </node>
+
+  </group>
+</launch>
