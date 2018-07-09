@@ -2,6 +2,7 @@
   <arg name="input" default="/camera/depth_registered/points"/>
   <arg name="DEFAULT_NAMESPACE" default="/"/>
   <arg name="create_manager" default="true"/>
+  <arg name="publish_tf" default="false"/>
   <arg name="manager" default="hsi_filter_manager"/>
 
   <arg name="h_max" default="127"/>
@@ -41,8 +42,9 @@
           output="screen">
       <remap from="~input" to="hsi_color_filter/output" />
       <remap from="~target" to="euclidean_clustering/output" />
-      <rosparam>
-        ~sort_by: z_axis
+      <rosparam subst_value="true">
+        sort_by: z_axis
+        publish_tf: $(arg publish_tf)
       </rosparam>
     </node>
 
