@@ -8,25 +8,28 @@
   <arg name="queue_size" default="10"/>
   <arg name="create_manager" default="true"/>
   <arg name="manager" default="create_points_manager"/>
+  <arg name="CAMERA_NAMESPACE" default="/camera"/>
 
-  <node if="$(arg create_manager)"
-        pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
+  <group ns="$(arg CAMERA_NAMESPACE)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
 
-  <node if="$(arg register_image)"
-        pkg="nodelet" type="nodelet" name="register"
-        args="load depth_image_proc/register $(arg manager)">
-    <remap from="rgb/camera_info" to="$(arg rgb_camera_info)"/>
-    <remap from="depth/camera_info" to="$(arg depth_camera_info)" />
-    <remap from="depth/image_rect" to="$(arg depth_image)" />
-    <param name="queue_size" value="$(arg queue_size)"/>
-  </node>
+    <node if="$(arg register_image)"
+          pkg="nodelet" type="nodelet" name="register" output="screen"
+          args="load depth_image_proc/register $(arg manager)">
+      <remap from="rgb/camera_info" to="$(arg rgb_camera_info)"/>
+      <remap from="depth/camera_info" to="$(arg depth_camera_info)" />
+      <remap from="depth/image_rect" to="$(arg depth_image)" />
+      <param name="queue_size" value="1000"/>
+    </node>
 
-  <node pkg="nodelet" type="nodelet" name="point_cloud_xyzrgb"
-        args="load depth_image_proc/point_cloud_xyzrgb $(arg manager)">
-    <remap from="rgb/camera_info" to="$(arg rgb_camera_info)"/>
-    <remap from="rgb/image_rect_color" to="$(arg rgb_image)" />
-    <remap from="depth_registered/image_rect" to="$(arg depth_image)" unless="$(arg register_image)"/>
-    <remap from="depth_registered/points" to="$(arg output)"/>
-    <param name="queue_size" value="(arg queue_size)"/>
-  </node>
+    <node pkg="nodelet" type="nodelet" name="point_cloud_xyzrgb" output="screen"
+          args="load depth_image_proc/point_cloud_xyzrgb $(arg manager)">
+      <remap from="rgb/camera_info" to="$(arg rgb_camera_info)"/>
+      <remap from="rgb/image_rect_color" to="$(arg rgb_image)" />
+      <remap from="depth_registered/image_rect" to="$(arg depth_image)" unless="$(arg register_image)"/>
+      <remap from="depth_registered/points" to="$(arg output)"/>
+      <param name="queue_size" value="10000"/>
+    </node>
+  </group>
 </launch>
