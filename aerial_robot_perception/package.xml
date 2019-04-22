@@ -22,6 +22,10 @@
   <depend>image_view</depend>
   <depend>jsk_perception</depend>
 
+  <exec_depend>tf</exec_depend>
+  <exec_depend>rosbag</exec_depend>
+  <exec_depend>rostest</exec_depend>
+
   <export>
     <nodelet plugin="${prefix}/plugins/nodelet/aerial_robot_perception_nodelet.xml"/>
   </export>

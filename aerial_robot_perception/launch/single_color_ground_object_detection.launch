@@ -1,7 +1,7 @@
 <launch>
   <arg name="output_screen" default="false"/>
-  <arg name="image_topic" />
-  <arg name="camera_info_topic" />
+  <arg name="image_topic" default="image" />
+  <arg name="camera_info_topic" default="camera_info" />
   <arg name="debug_view" default="false"/>
   <arg name="object_height" default="0.2"/>
   <arg name="contour_area_size" default="0.05"/>
@@ -29,8 +29,8 @@
     <param name="v_limit_min" value="$(arg v_limit_min)"/>
   </node>
 
-  <node pkg="nodelet" type="nodelet" name="find_object_with_size_filter"
-        args="load aerial_robot_perception/FindObjectWithSizeFilter object_detection_nodelet" output="screen">
+  <node pkg="nodelet" type="nodelet" name="ground_object_detection_with_size_filter"
+        args="load aerial_robot_perception/GroundObjectDetectionWithSizeFilter object_detection_nodelet" output="screen">
     <remap from="image" to="/hsv_color_filter/image" />
     <remap from="camera_info" to="$(arg camera_info_topic)"/>
     <param name="object_height" value="$(arg object_height)"/>

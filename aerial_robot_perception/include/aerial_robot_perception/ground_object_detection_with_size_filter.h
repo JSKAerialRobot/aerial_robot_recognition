@@ -57,10 +57,10 @@
 namespace aerial_robot_perception
 {
 
-  class FindObjectWithSizeFilter: public jsk_topic_tools::DiagnosticNodelet
+  class GroundObjectDetectionWithSizeFilter: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    FindObjectWithSizeFilter(): DiagnosticNodelet("FindObjectWithSizeFilter") {}
+    GroundObjectDetectionWithSizeFilter(): DiagnosticNodelet("GroundObjectDetectionWithSizeFilter") {}
 
   protected:
     /* ros publisher */
