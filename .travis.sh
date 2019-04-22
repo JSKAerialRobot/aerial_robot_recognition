@@ -22,7 +22,7 @@ function travis_time_end {
     set -x
 }
 
-apt-get update -qq && apt-get install -y -q wget sudo lsb-release gnupg # for docker
+apt-get update -qq && apt-get install -y -q wget sudo python-pip lsb-release gnupg # for docker
 # set DEBIAN_FRONTEND=noninteractive
 echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
 
@@ -59,7 +59,7 @@ cd ~/catkin_ws
 wstool init src
 wstool update -t src
 wstool info -t src
-rosdep install -q -y -r --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+rosdep install -q -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 travis_time_end
 
 # Compile and test.
