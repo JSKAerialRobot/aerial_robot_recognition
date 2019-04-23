@@ -36,7 +36,7 @@ include_directories(
   )
 
 # download and install sample data
-add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
 
 
 macro(arp_add_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
@@ -44,11 +44,25 @@ macro(arp_add_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     ${PROJECT_NAME}_nodelet_sources ${PROJECT_NAME}_nodelet_executables)
 endmacro()
 
-arp_add_nodelet(src/find_object_with_size_filter.cpp "aerial_robot_perception/FindObjectWithSizeFilter" "find_object_with_size_filter")
+arp_add_nodelet(src/ground_object_detection_with_size_filter.cpp "aerial_robot_perception/groundObjectDetectionWithSizeFilter" "ground_object_detection_with_size_filter")
 
 add_library(${PROJECT_NAME} SHARED ${aerial_robot_perception_nodelet_sources})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
 
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_LIBRARIES})
+endif()
+
+# test
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED COMPONENTS rostest roslaunch)
+  if(roslaunch_VERSION VERSION_LESS "1.11.1")
+    message(WARNING "roslaunch_add_file check fails with unsupported doc attributes ${roslaunch_VERSION}")
+  else()
+    file(GLOB LAUNCH_FILES launch/*.launch)
+    foreach(LAUNCH_FILE ${LAUNCH_FILES})
+      roslaunch_add_file_check(${LAUNCH_FILE})
+    endforeach()
+  endif()
+  add_subdirectory(test)
 endif()

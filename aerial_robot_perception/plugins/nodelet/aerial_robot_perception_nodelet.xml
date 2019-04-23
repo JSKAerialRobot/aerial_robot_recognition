@@ -1,6 +1,6 @@
 <library path="lib/libaerial_robot_perception">
-  <class name="aerial_robot_perception/FindObjectWithSizeFilter"
-         type="aerial_robot_perception::FindObjectWithSizeFilter"
+  <class name="aerial_robot_perception/GroundObjectDetectionWithSizeFilter"
+         type="aerial_robot_perception::GroundObjectDetectionWithSizeFilter"
          base_class_type="nodelet::Nodelet">
   </class>
 </library>
