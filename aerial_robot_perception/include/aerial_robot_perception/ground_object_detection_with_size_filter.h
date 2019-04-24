@@ -64,6 +64,7 @@ namespace aerial_robot_perception
 
   protected:
     /* ros publisher */
+    ros::Publisher target_pos_pub_;
     image_transport::Publisher image_pub_; //for debug
 
     /* ros subscriber */
