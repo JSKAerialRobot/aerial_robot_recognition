@@ -49,7 +49,9 @@ namespace aerial_robot_perception
     pnh_->param("frame_id", frame_id_, std::string("target_object"));
     always_subscribe_ = true; //because of no subscriber
 
+    target_pos_pub_ = advertise<geometry_msgs::Vector3Stamped>(*nh_, frame_id_ + std::string("/pos"), 1);
     if (debug_view_) image_pub_ = advertiseImage(*pnh_, "debug_image", 1);
+
 
     it_ = boost::make_shared<image_transport::ImageTransport>(*nh_);
     tf_ls_ = boost::make_shared<tf2_ros::TransformListener>(tf_buff_);
@@ -77,9 +79,10 @@ namespace aerial_robot_perception
 
   void GroundObjectDetectionWithSizeFilter::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
-    geometry_msgs::TransformStamped cam_tf;
+    tf2::Transform cam_tf;
     try{
-      cam_tf = tf_buff_.lookupTransform("world", msg->header.frame_id, msg->header.stamp);
+      geometry_msgs::TransformStamped cam_pose_msg = tf_buff_.lookupTransform("world", msg->header.frame_id, msg->header.stamp);
+      tf2::convert(cam_pose_msg.transform, cam_tf);
     }
     catch (tf2::TransformException &ex) {
       ROS_WARN("%s",ex.what());
@@ -92,7 +95,7 @@ namespace aerial_robot_perception
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(src_image, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0));
 
-    double object_distance = cam_tf.transform.translation.z - object_height_;
+    double object_distance = cam_tf.getOrigin().z() - object_height_;
     double object_distance2 = object_distance * object_distance;
     double dist_from_center_min = 1e6;
     std::vector<cv::Point> target_contour;
@@ -130,13 +133,18 @@ namespace aerial_robot_perception
       target_obj_uv.setZ(1.0);
       tf2::Vector3 object_pos_in_optical_frame = camera_K_inv_ * target_obj_uv * object_distance;
 
-      geometry_msgs::TransformStamped obj_pos_msg;
-      obj_pos_msg.header = msg->header;
-      obj_pos_msg.child_frame_id = frame_id_;
-      obj_pos_msg.transform.translation = tf2::toMsg(object_pos_in_optical_frame);
-      obj_pos_msg.transform.rotation.w = 1.0;
+      geometry_msgs::TransformStamped obj_tf_msg;
+      obj_tf_msg.header = msg->header;
+      obj_tf_msg.header.frame_id = std::string("world");
+      obj_tf_msg.child_frame_id = frame_id_;
+      obj_tf_msg.transform.translation = tf2::toMsg(cam_tf * object_pos_in_optical_frame);
+      obj_tf_msg.transform.rotation.w = 1.0;
+      tf_br_.sendTransform(obj_tf_msg);
 
-      tf_br_.sendTransform(obj_pos_msg);
+      geometry_msgs::Vector3Stamped obj_pos_msg;
+      obj_pos_msg.header = obj_tf_msg.header;
+      obj_pos_msg.vector = obj_tf_msg.transform.translation;
+      target_pos_pub_.publish(obj_pos_msg);
     }
   }
 } //namespace aerial_robot_perception

@@ -48,7 +48,7 @@
         pkg="rostest" type="publishtest">
     <rosparam>
       topics:
-      - name: /ground_object_detection_with_size_filter/debug_image
+      - name: /target_object/pos
       timeout: 10
       negative: False
     </rosparam>
