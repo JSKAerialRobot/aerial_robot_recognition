@@ -52,24 +52,18 @@ namespace aerial_robot_perception
     target_pos_pub_ = advertise<geometry_msgs::Vector3Stamped>(*nh_, frame_id_ + std::string("/pos"), 1);
     if (debug_view_) image_pub_ = advertiseImage(*pnh_, "debug_image", 1);
 
-
     it_ = boost::make_shared<image_transport::ImageTransport>(*nh_);
     tf_ls_ = boost::make_shared<tf2_ros::TransformListener>(tf_buff_);
 
     ros::Duration(1.0).sleep();
-    sensor_msgs::CameraInfoConstPtr cam_info = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("camera_info", *nh_, ros::Duration(10.0));
-    NODELET_DEBUG_STREAM("receive camera info");
-    tf2::Matrix3x3 camera_K(cam_info->K[0], cam_info->K[1], cam_info->K[2], cam_info->K[3], cam_info->K[4], cam_info->K[5], cam_info->K[6], cam_info->K[7], cam_info->K[8]);
-    camera_K_inv_ = camera_K.inverse();
-    real_size_scale_ = cam_info->K[0] * cam_info->K[4];
 
     onInitPostProcess();
   }
 
-
   void GroundObjectDetectionWithSizeFilter::subscribe()
   {
     image_sub_ = it_->subscribe("image", 1, &GroundObjectDetectionWithSizeFilter::imageCallback, this);
+    cam_info_sub_ = nh_->subscribe("camera_info", 1, &GroundObjectDetectionWithSizeFilter::cameraInfoCallback, this);
   }
 
   void GroundObjectDetectionWithSizeFilter::unsubscribe()
@@ -77,8 +71,23 @@ namespace aerial_robot_perception
     image_sub_.shutdown();
   }
 
+  void GroundObjectDetectionWithSizeFilter::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg)
+  {
+    /* the following process is executed once */
+    NODELET_DEBUG_STREAM("receive camera info");
+    tf2::Matrix3x3 camera_K(msg->K[0], msg->K[1], msg->K[2],
+                            msg->K[3], msg->K[4], msg->K[5],
+                            msg->K[6], msg->K[7], msg->K[8]);
+    camera_K_inv_ = camera_K.inverse();
+    real_size_scale_ = msg->K[0] * msg->K[4];
+
+    cam_info_sub_.shutdown();
+  }
+
   void GroundObjectDetectionWithSizeFilter::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
+    if(real_size_scale_ == 0) return; // no receive camera_info yet.
+
     tf2::Transform cam_tf;
     try{
       geometry_msgs::TransformStamped cam_pose_msg = tf_buff_.lookupTransform("world", msg->header.frame_id, msg->header.stamp);
