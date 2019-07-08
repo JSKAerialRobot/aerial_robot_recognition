@@ -1,6 +1,7 @@
 <launch>
   <arg name="input_image" default="/downward_camera/image"/>
   <arg name="gui" default="True"/>
+  <arg name="contour_area_size" default="0.05"/>
 
   <include file="$(find aerial_robot_perception)/launch/single_color_ground_object_detection.launch">
     <arg name="image_topic" value="$(arg input_image)"/>
@@ -8,7 +9,7 @@
     <arg name="debug_view" value="true"/>
     <arg name="output_screen" value="false"/>
     <arg name="object_height" default="0.2"/>
-    <arg name="contour_area_size" default="0.05"/>
+    <arg name="contour_area_size" default="$(arg contour_area_size)"/>
     <arg name="contour_area_margin" default="0.01"/>
   </include>
 
