@@ -60,7 +60,7 @@ namespace aerial_robot_perception
   class GroundObjectDetectionWithSizeFilter: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    GroundObjectDetectionWithSizeFilter(): DiagnosticNodelet("GroundObjectDetectionWithSizeFilter") {}
+    GroundObjectDetectionWithSizeFilter(): DiagnosticNodelet("GroundObjectDetectionWithSizeFilter"), real_size_scale_(0) {}
 
   protected:
     /* ros publisher */
@@ -69,6 +69,7 @@ namespace aerial_robot_perception
 
     /* ros subscriber */
     image_transport::Subscriber image_sub_;
+    ros::Subscriber cam_info_sub_;
 
     /* image transport */
     boost::shared_ptr<image_transport::ImageTransport> it_;
@@ -88,6 +89,7 @@ namespace aerial_robot_perception
     tf2::Matrix3x3 camera_K_inv_;
 
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+    void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg);
 
     virtual void onInit();
     virtual void subscribe();
