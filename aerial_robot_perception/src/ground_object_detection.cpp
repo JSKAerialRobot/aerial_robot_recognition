@@ -33,15 +33,15 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <aerial_robot_perception/ground_object_detection_with_size_filter.h>
+#include <aerial_robot_perception/ground_object_detection.h>
 
 namespace aerial_robot_perception
 {
-
-  void GroundObjectDetectionWithSizeFilter::onInit()
+  void GroundObjectDetection::onInit()
   {
     DiagnosticNodelet::onInit();
     /* ros params */
+    /** for size filter mode **/
     pnh_->param("contour_area_size", contour_area_size_, 0.2);
     pnh_->param("contour_area_margin", contour_area_margin_, 0.01);
     pnh_->param("object_height", object_height_, 0.05);
@@ -60,18 +60,18 @@ namespace aerial_robot_perception
     onInitPostProcess();
   }
 
-  void GroundObjectDetectionWithSizeFilter::subscribe()
+  void GroundObjectDetection::subscribe()
   {
-    image_sub_ = it_->subscribe("image", 1, &GroundObjectDetectionWithSizeFilter::imageCallback, this);
-    cam_info_sub_ = nh_->subscribe("camera_info", 1, &GroundObjectDetectionWithSizeFilter::cameraInfoCallback, this);
+    image_sub_ = it_->subscribe("image", 1, &GroundObjectDetection::imageCallback, this);
+    cam_info_sub_ = nh_->subscribe("camera_info", 1, &GroundObjectDetection::cameraInfoCallback, this);
   }
 
-  void GroundObjectDetectionWithSizeFilter::unsubscribe()
+  void GroundObjectDetection::unsubscribe()
   {
     image_sub_.shutdown();
   }
 
-  void GroundObjectDetectionWithSizeFilter::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg)
+  void GroundObjectDetection::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg)
   {
     /* the following process is executed once */
     NODELET_DEBUG_STREAM("receive camera info");
@@ -84,7 +84,7 @@ namespace aerial_robot_perception
     cam_info_sub_.shutdown();
   }
 
-  void GroundObjectDetectionWithSizeFilter::imageCallback(const sensor_msgs::ImageConstPtr& msg)
+  void GroundObjectDetection::imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     if(real_size_scale_ == 0) return; // no receive camera_info yet.
 
@@ -107,6 +107,7 @@ namespace aerial_robot_perception
     double object_distance = cam_tf.getOrigin().z() - object_height_;
     double object_distance2 = object_distance * object_distance;
     double dist_from_center_min = 1e6;
+    double max_contour_area = 0;
     std::vector<cv::Point> target_contour;
 
     auto calc_position = [](std::vector<cv::Point> contour) {
@@ -121,12 +122,23 @@ namespace aerial_robot_perception
       double real_contour_area = cv::contourArea(contour) * object_distance2 / real_size_scale_;
       NODELET_DEBUG_STREAM("contour size" << real_contour_area);
 
-      if(std::abs(real_contour_area - contour_area_size_) < contour_area_margin_) {
-        tf2::Vector3 obj_pos = calc_position(contour);
-        double dist_from_center = (obj_pos.x() - src_image.cols/2) * (obj_pos.x() - src_image.cols/2) + (obj_pos.y() - src_image.rows/2) * (obj_pos.y() - src_image.rows/2);
-        if (dist_from_center < dist_from_center_min) {
-          dist_from_center_min = dist_from_center;
+      if(contour_area_size_ > 0) {
+        /* size filtering mode */
+          if(std::abs(real_contour_area - contour_area_size_) < contour_area_margin_) {
+            tf2::Vector3 obj_pos = calc_position(contour);
+            double dist_from_center = (obj_pos.x() - src_image.cols/2) * (obj_pos.x() - src_image.cols/2) + (obj_pos.y() - src_image.rows/2) * (obj_pos.y() - src_image.rows/2);
+            if (dist_from_center < dist_from_center_min) {
+              dist_from_center_min = dist_from_center;
+              target_contour = contour;
+            }
+          }
+        }
+      else {
+        /* find maximum size */
+        if (max_contour_area < real_contour_area) {
+          max_contour_area = real_contour_area;
           target_contour = contour;
+          dist_from_center_min = 0;
         }
       }
     }
@@ -159,4 +171,4 @@ namespace aerial_robot_perception
 } //namespace aerial_robot_perception
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (aerial_robot_perception::GroundObjectDetectionWithSizeFilter, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (aerial_robot_perception::GroundObjectDetection, nodelet::Nodelet);

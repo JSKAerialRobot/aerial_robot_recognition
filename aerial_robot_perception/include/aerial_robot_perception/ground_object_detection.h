@@ -56,11 +56,10 @@
 
 namespace aerial_robot_perception
 {
-
-  class GroundObjectDetectionWithSizeFilter: public jsk_topic_tools::DiagnosticNodelet
+  class GroundObjectDetection: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    GroundObjectDetectionWithSizeFilter(): DiagnosticNodelet("GroundObjectDetectionWithSizeFilter"), real_size_scale_(0) {}
+    GroundObjectDetection(): DiagnosticNodelet("GroundObjectDetection"), real_size_scale_(0) {}
 
   protected:
     /* ros publisher */
@@ -97,3 +96,4 @@ namespace aerial_robot_perception
   };
 
 } //namespace aerial_robot_perception
+
