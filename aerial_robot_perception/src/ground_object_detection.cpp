@@ -44,6 +44,7 @@ namespace aerial_robot_perception
     /** for size filter mode **/
     pnh_->param("contour_area_size", contour_area_size_, 0.2);
     pnh_->param("contour_area_margin", contour_area_margin_, 0.01);
+    pnh_->param("contour_area_min_thre", contour_area_min_thre, 0.1);
     pnh_->param("object_height", object_height_, 0.05);
     pnh_->param("debug_view", debug_view_, false);
     pnh_->param("frame_id", frame_id_, std::string("target_object"));
@@ -135,7 +136,7 @@ namespace aerial_robot_perception
         }
       else {
         /* find maximum size */
-        if (max_contour_area < real_contour_area) {
+        if (max_contour_area < real_contour_area && real_contour_area > contour_area_min_thre) {
           max_contour_area = real_contour_area;
           target_contour = contour;
           dist_from_center_min = 0;
