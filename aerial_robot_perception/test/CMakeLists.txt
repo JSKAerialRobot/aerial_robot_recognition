@@ -1,4 +1,4 @@
-add_rostest(test-single_color_ground_object_detection.test ARGS contour_area_size:=0 gui:=false) # max size mode
+add_rostest(test-single_color_ground_object_detection.test ARGS contour_area_size:=0 contour_area_min_thre:=0.04 gui:=false) # max size mode
 add_rostest(test-single_color_ground_object_detection.test ARGS gui:=false) # size filtering mode
 
 if(roslaunch_VERSION VERSION_LESS "1.11.1")
