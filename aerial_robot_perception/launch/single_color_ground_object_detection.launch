@@ -7,6 +7,7 @@
   <arg name="object_height" default="0.0"/>
   <arg name="contour_area_size" default="0.0"/>
   <arg name="contour_area_margin" default="0.0"/>
+  <arg name="contour_area_min_thre" default="0.1"/>
   <arg name="frame_id" default="target_object"/>
   <arg name="h_limit_max" default="33" doc="The maximum allowed field value Hue" />
   <arg name="h_limit_min" default="10" doc="The minimum allowed field value Hue" />
@@ -37,6 +38,7 @@
     <param name="object_height" value="$(arg object_height)"/>
     <param name="contour_area_size" value="$(arg contour_area_size)"/>
     <param name="contour_area_margin" value="$(arg contour_area_margin)"/>
+    <param name="contour_area_min_thre" value="$(arg contour_area_min_thre)"/>
     <param name="debug_view" value="$(arg debug_view)"/>
     <param name="frame_id" value="$(arg frame_id)"/>
   </node>
