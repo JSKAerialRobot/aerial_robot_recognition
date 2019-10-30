@@ -1,6 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <library path="lib/libaerial_robot_perception">
   <class name="aerial_robot_perception/GroundObjectDetection"
          type="aerial_robot_perception::GroundObjectDetection"
+	 base_class_type="nodelet::Nodelet">
+  </class>
+  
+  <class name="aerial_robot_perception/ClutteredBrickDetection"
+         type="aerial_robot_perception::ClutteredBrickDetection"
          base_class_type="nodelet::Nodelet">
   </class>
 </library>
