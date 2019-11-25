@@ -1,0 +1,57 @@
+passthrough_filter_for_object:
+    keep_organized: true
+    filter_field_name: z
+    filter_limit_min: 0.0
+    filter_limit_max: 3.0
+    filter_limit_negative: False
+
+hsi_filter_red:
+    use_indices: false
+    keep_organized: true
+    h_limit_max: 50
+    h_limit_min: -50
+    s_limit_max: 255
+    s_limit_min: 100
+    i_limit_max: 255
+    i_limit_min: 0
+
+passthrough_filter_for_ground:
+    keep_organized: true
+    filter_field_name: z
+    filter_limit_min: 0.0
+    filter_limit_max: 4.0
+    filter_limit_negative: False
+
+ground_estimate:
+    publish_normal: True
+    max_curvature: 0.03
+    min_size: 10000
+    angular_threshold: 0.10
+    distance_threshold: 0.10
+    connect_plane_angle_threshold: 0.3
+    connect_distance_threshold: 0.03
+    min_refined_area_threshold: 0.01
+ 
+multi_plane_extraction:
+    use_indices: False
+    use_coefficients: True
+    min_height: 0.18
+    max_height: 0.2
+    use_async: true
+
+clustering_red_object:
+    min_size: 1000
+    max_size: 10000000
+
+line_detector:
+    approximate_sync: True
+    outlier_threshold: 0.05
+    max_iterations: 1
+    min_indices: 1
+    min_length: 0.05
+    line_width: 0.02
+
+get_horizontal_object_info:
+    detected_line_name: /line_detector/debug/line_marker
+    camera_frame_name: rs_d435_color_optical_frame
+   
