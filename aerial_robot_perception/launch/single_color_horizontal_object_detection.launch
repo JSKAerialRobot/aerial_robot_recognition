@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="INPUT_CLOUD" default="/rs_d435/depth_registered/points" />
+  <rosparam file="$(find aerial_robot_perception)/config/HorizontalObjectDetectionConfig.yaml" command="load"/>
+
+  <node name="ground_plane_in_sensor_frame"
+        pkg="aerial_robot_perception" type="ground_plane_in_sensor_frame.py" >
+    <param name="sensor_frame" value="rs_d435_color_frame" />
+  </node>
+
+  <node name="horizontal_object_detector_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node pkg="nodelet" type="nodelet" name="hsi_filter_red" respawn="true"
+        args="load jsk_pcl/HSIColorFilter horizontal_object_detector_manager" >
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet horizontal_object_detector_manager">
+
+    <remap from="cloud_in" to="hsi_filter_red/output"/>
+    <remap from="scan" to="ground_plane_in_sensor_frame/scan"/>
+  </node>
+
+  <node name="line_extractor" pkg="laser_line_extraction" type="line_extraction_node" />
+  <node pkg="aerial_robot_perception" type="get_horizontal_object_info.py" name="get_horizontal_object_info" output="screen"/>
+
+</launch>

@@ -76,11 +76,11 @@ class GetObjectData():
             rospy.init_node(name, anonymous=True)
 
         # rospram
-        self.detected_line_name = rospy.get_param('~detected_line_name', '/line_detector/debug/line_marker')
+        detected_line_name = rospy.get_param('~detected_line_name', '/line_detector/debug/line_marker')
         self.camera_frame_name = rospy.get_param('~camera_frame_name', 'rs_d435_color_optical_frame')
-            
+
         # subscriber
-        self.get_object_data_sub = rospy.Subscriber(self.detected_line_name, Marker, self.getobjectdataCallback)
+        self.get_object_data_sub = rospy.Subscriber(detected_line_name, Marker, self.getobjectdataCallback)
 
         # tf
         self.tfBuffer = tf2_ros.Buffer()
@@ -151,7 +151,7 @@ class GetObjectData():
         line1_norm_vec = line1_vec / np.linalg.norm(line1_vec)
         line2_norm_vec = line2_vec / np.linalg.norm(line2_vec)
         if abs(np.dot(line1_norm_vec, line2_norm_vec)) >= 0.7: # 1.0/math.sqrt(2)
-            rospy.logwarn("detected lines do not meet at right angles ")
+            rospy.logwarn("detected lines do not meet at right angles")
             return
         target_angle_vector = line1_norm_vec + line2_norm_vec
         np.append(target_angle_vector, [0.5])

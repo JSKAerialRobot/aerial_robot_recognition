@@ -1,10 +1,3 @@
-passthrough_filter_for_object:
-    keep_organized: true
-    filter_field_name: z
-    filter_limit_min: 0.0
-    filter_limit_max: 3.0
-    filter_limit_negative: False
-
 hsi_filter_red:
     use_indices: false
     keep_organized: true
@@ -15,43 +8,38 @@ hsi_filter_red:
     i_limit_max: 255
     i_limit_min: 0
 
-passthrough_filter_for_ground:
-    keep_organized: true
-    filter_field_name: z
-    filter_limit_min: 0.0
-    filter_limit_max: 4.0
-    filter_limit_negative: False
+pointcloud_to_laserscan:
+    target_frame: ground_plane_in_sensor_frame # rs_d435_color_frame
+    transform_tolerance: 0.01
+    min_height: 0.0
+    max_height: 0.1
 
-ground_estimate:
-    publish_normal: True
-    max_curvature: 0.03
-    min_size: 10000
-    angular_threshold: 0.10
-    distance_threshold: 0.10
-    connect_plane_angle_threshold: 0.3
-    connect_distance_threshold: 0.03
-    min_refined_area_threshold: 0.01
- 
-multi_plane_extraction:
-    use_indices: False
-    use_coefficients: True
-    min_height: 0.18
-    max_height: 0.2
-    use_async: true
+    angle_min: -0.5 # less than the end link
+    angle_max: 0.5 # less than the end link
+    angle_increment: 0.0087 # M_PI/360.0
+    scan_time: 10 # ?
+    range_min: 0.45
+    range_max: 4.0
+    use_inf: true
+    inf_epsilon: 1.0
 
-clustering_red_object:
-    min_size: 1000
-    max_size: 10000000
-
-line_detector:
-    approximate_sync: True
-    outlier_threshold: 0.05
-    max_iterations: 1
-    min_indices: 1
-    min_length: 0.05
-    line_width: 0.02
+    concurrency_level: 0
+        
+line_extractor:
+    scan_topic: /ground_plane_in_sensor_frame/scan
+    publish_markers: true
+    bearing_std_dev: 0.01
+    range_std_dev: 0.012
+    least_sq_angle_thresh: 0.1
+    least_sq_radius_thresh: 0.1
+    max_line_gap: 0.5
+    min_line_length: 0.1
+    min_range: 0.01
+    min_split_dist: 0.1
+    outlier_dist: 0.1
+    min_line_points: 10
 
 get_horizontal_object_info:
-    detected_line_name: /line_detector/debug/line_marker
+    detected_line_name: /line_markers
     camera_frame_name: rs_d435_color_optical_frame
    

@@ -21,6 +21,7 @@
   <depend>nodelet</depend>
   <depend>image_view</depend>
   <depend>jsk_perception</depend>
+  <depend>pointcloud_to_laserscan</depend>
 
   <exec_depend>tf</exec_depend>
   <exec_depend>rosbag</exec_depend>
