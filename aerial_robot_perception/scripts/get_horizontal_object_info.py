@@ -10,6 +10,7 @@ from visualization_msgs.msg import Marker
 import tf
 import sys
 import math
+import itertools
 import numpy as np
 
 class RvizMarker():
@@ -102,6 +103,9 @@ class GetObjectData():
         if div == 0:
             rospy.logwarn("lines do not intersect")
             return None
+        # if div > 0:
+        #     rospy.logwarn("lines intersect in the back")
+        #     return None
 
         d = (det(*line1), det(*line2))
         x = det(d, x_diff) / div
@@ -110,36 +114,54 @@ class GetObjectData():
 
     def getobjectdataCallback(self, msg):
         #rospy.loginfo("number of points: %d",len(msg.points))
-        if not (len(msg.points) == 4):
-            rospy.logwarn("number of detected lines: %d",len(msg.points)/2)
+        if (len(msg.points) < 3):
+            rospy.logwarn("number of detected points: %d",len(msg.points))
             return
+
+        point_coords_camera = []
+        lines_coords_camera = []
+        for i in range(len(msg.points)):
+            point_coords_camera.append([msg.points[i].x, msg.points[i].y, msg.points[i].z])
+            if (i % 2) == 1:
+                if point_coords_camera[i-1][0] > point_coords_camera[i][0]:
+                    point_coords_camera[i-1], point_coords_camera[i] = point_coords_camera[i], point_coords_camera[i-1]
+            lines_coords_camera.append([point_coords_camera[i-1], point_coords_camera[i]])
+        #lines_coords_camera.sort(key=lambda arg: arg[0][1])
+        lines_coords_camera.sort(key=lambda arg: arg[0][0])
+        lines_coords_camera = list(itertools.chain.from_iterable(lines_coords_camera))
         point_st = PoseStamped()
         point_st.header.frame_id = self.camera_frame_name
         orientation = Quaternion()
         point_st.pose.orientation = orientation
-        point_coords_camera = []
         point_coords_world = []
-        for i in range(len(msg.points)):
-            point_coords_camera.append([msg.points[i].x, msg.points[i].y, msg.points[i].z])
-            point_st.pose.position.x = point_coords_camera[i][0]
-            point_st.pose.position.y = point_coords_camera[i][1]
-            point_st.pose.position.z = point_coords_camera[i][2]
+        for i in range(4):
+            point_st.pose.position.x = lines_coords_camera[i][0]
+            point_st.pose.position.y = lines_coords_camera[i][1]
+            point_st.pose.position.z = lines_coords_camera[i][2]
 
             trans = self.tfBuffer.transform(point_st, 'world')
             point_coords_world.append([trans.pose.position.x,trans.pose.position.y, trans.pose.position.z])
             #rospy.loginfo("points%d: (%f, %f, %f)", i, point_coords_world[i][0], point_coords_world[i][1], point_coords_world[i][2])
 
-            ''' make point coords ascending order based on z value before conversion ''' 
-            if (i % 2) == 1:
-                if point_coords_camera[i-1][2] > point_coords_camera[i][2]:
-                    point_coords_world[i-1], point_coords_world[i] = point_coords_world[i], point_coords_world[i-1]
-                 
         length_list = []
         lines = []
-        for i in range(len(msg.points)/2):
-            lines.append([[point_coords_world[i*2][0],point_coords_world[i*2][1]],[point_coords_world[i*2+1][0],point_coords_world[i*2+1][1]]])
-            length_list.append(math.sqrt((point_coords_world[i*2][0] - point_coords_world[i*2+1][0])**2 + (point_coords_world[i*2][1] - point_coords_world[i*2+1][1])**2 + (point_coords_world[i*2][2] - point_coords_world[i*2+1][2])**2))
-            #rospy.loginfo("length%d: %f", i, length_list[i])
+        # for i in range(len(msg.points)-1):
+        #     lines.append([[point_coords_world[i][0],point_coords_world[i][1]],[point_coords_world[i+1][0],point_coords_world[i+1][1]]])
+        #     if i >= 1:
+        #         target_object_vertex = np.array(self.line_intersection(lines[i-1], lines[i]))
+        #         if not target_object_vertex.all():
+        #             continue
+        #         else:
+        #             #lines[0] = lines[i-1]
+        #             #lines[1] = lines[i]
+        #             break
+
+            #length_list.append(math.sqrt((point_coords_world[i][0] - point_coords_world[i+1][0])**2 + (point_coords_world[i][1] - point_coords_world[i+1][1])**2 + (point_coords_world[i][2] - point_coords_world[i+1][2])**2))
+
+        for i in range(2):
+           lines.append([[point_coords_world[i*2][0],point_coords_world[i*2][1]],[point_coords_world[i*2+1][0],point_coords_world[i*2+1][1]]])
+           length_list.append(math.sqrt((point_coords_world[i*2][0] - point_coords_world[i*2+1][0])**2 + (point_coords_world[i*2][1] - point_coords_world[i*2+1][1])**2 + (point_coords_world[i*2][2] - point_coords_world[i*2+1][2])**2))
+           #rospy.loginfo("length%d: %f", i, length_list[i])
 
         target_object_vertex = np.array(self.line_intersection(lines[0], lines[1]))
         if not target_object_vertex.all():
@@ -150,9 +172,9 @@ class GetObjectData():
         line2_vec = np.array([lines[1][1][0] - lines[1][0][0], lines[1][1][1] - lines[1][0][1]])
         line1_norm_vec = line1_vec / np.linalg.norm(line1_vec)
         line2_norm_vec = line2_vec / np.linalg.norm(line2_vec)
-        if abs(np.dot(line1_norm_vec, line2_norm_vec)) >= 0.7: # 1.0/math.sqrt(2)
-            rospy.logwarn("detected lines do not meet at right angles")
-            return
+        #if abs(np.dot(line1_norm_vec, line2_norm_vec)) >= 0.7: # 1.0/math.sqrt(2)
+        #    rospy.logwarn("detected lines do not meet at right angles")
+        #    return
         target_angle_vector = line1_norm_vec + line2_norm_vec
         np.append(target_angle_vector, [0.5])
         #rospy.loginfo(target_angle_vector)
