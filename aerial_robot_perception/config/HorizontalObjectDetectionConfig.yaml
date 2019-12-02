@@ -16,7 +16,7 @@ pointcloud_to_laserscan:
 
     angle_min: -0.5 # less than the end link
     angle_max: 0.5 # less than the end link
-    angle_increment: 0.0087 # M_PI/360.0
+    angle_increment: 0.002 # M_PI/360.0
     scan_time: 10 # ?
     range_min: 0.45
     range_max: 4.0
@@ -32,14 +32,14 @@ line_extractor:
     range_std_dev: 0.012
     least_sq_angle_thresh: 0.1
     least_sq_radius_thresh: 0.1
-    max_line_gap: 0.5
+    max_line_gap: 0.01
     min_line_length: 0.1
     min_range: 0.01
-    min_split_dist: 0.1
+    min_split_dist: 0.05
     outlier_dist: 0.1
     min_line_points: 10
 
 get_horizontal_object_info:
     detected_line_name: /line_markers
-    camera_frame_name: rs_d435_color_optical_frame
+    camera_frame_name: ground_plane_in_sensor_frame
    
