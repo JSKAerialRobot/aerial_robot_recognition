@@ -46,6 +46,7 @@ endmacro()
 
 arp_add_nodelet(src/ground_object_detection.cpp "aerial_robot_perception/groundObjectDetection" "ground_object_detection")
 arp_add_nodelet(src/cluttered_brick_detection.cpp "aerial_robot_perception/ClutteredBrickDetection" "cluttered_brick_detection")
+arp_add_nodelet(src/far_object_detection.cpp "aerial_robot_perception/FarObjectDetection" "far_object_detection")
 
 add_library(${PROJECT_NAME} SHARED ${aerial_robot_perception_nodelet_sources})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
