@@ -3,4 +3,9 @@
          type="aerial_robot_perception::GroundObjectDetection"
          base_class_type="nodelet::Nodelet">
   </class>
+
+  <class name="aerial_robot_perception/FarObjectDetection"
+         type="aerial_robot_perception::FarObjectDetection"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>
