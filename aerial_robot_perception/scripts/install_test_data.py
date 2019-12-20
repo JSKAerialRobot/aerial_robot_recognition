@@ -14,6 +14,15 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='test/data/2019-12-21-03-41-17_turtlebot_kinect_scan.bag',
+        url='https://drive.google.com/uc?id=1QYoFwvpB6m9wQTX6Zv1DxscRD88Ba8uG',
+        md5='f77ef9a17234d3d814d29f7bf482b57c',
+        extract=False,
+    )
+
+
 if __name__ == '__main__':
     main()
 

@@ -10,11 +10,13 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
   rospy
+  sensor_msgs
   tf2_ros
   tf2_geometry_msgs
   nodelet
   image_view
   jsk_perception
+  visualization_msgs
 )
 
 find_package(Boost REQUIRED)
@@ -46,8 +48,9 @@ endmacro()
 
 arp_add_nodelet(src/ground_object_detection.cpp "aerial_robot_perception/groundObjectDetection" "ground_object_detection")
 arp_add_nodelet(src/cluttered_brick_detection.cpp "aerial_robot_perception/ClutteredBrickDetection" "cluttered_brick_detection")
+arp_add_nodelet(src/laser_line_extraction_ros.cpp "aerial_robot_perception/LaserLineExtraction" "laser_line_extraction")
 
-add_library(${PROJECT_NAME} SHARED ${aerial_robot_perception_nodelet_sources})
+add_library(${PROJECT_NAME} SHARED ${aerial_robot_perception_nodelet_sources} src/line_extraction.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
 
 if(catkin_EXPORTED_LIBRARIES)

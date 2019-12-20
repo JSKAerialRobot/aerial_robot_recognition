@@ -1,0 +1,24 @@
+<launch>
+  <arg name="gui" default="True"/>
+
+  <include file="$(find aerial_robot_perception)/launch/laser_line_extraction.launch" />
+
+
+  <group if="$(arg gui)">
+    <node name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find aerial_robot_perception)/test/laser_line_extraction.rviz" >
+    </node>
+  </group>
+
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(find aerial_robot_perception)/test/data/2019-12-21-03-41-17_turtlebot_kinect_scan.bag --clock -l">
+  </node>
+
+  <!-- test codes -->
+  <param name="hztest/topic" value="/line_markers" />
+  <param name="hztest/hz" value="9.0" />
+  <param name="hztest/hzerror" value="1.0" />
+  <param name="hztest/test_duration" value="10.0" />
+  <test test-name="hztest_test" pkg="rostest" type="hztest" name="hztest" />
+
+</launch>
