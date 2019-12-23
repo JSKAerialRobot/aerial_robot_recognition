@@ -16,15 +16,18 @@
   <depend>nav_msgs</depend>
   <depend>roscpp</depend>
   <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
   <depend>tf2_ros</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>nodelet</depend>
   <depend>image_view</depend>
   <depend>jsk_perception</depend>
+  <depend>visualization_msgs</depend>
 
   <exec_depend>tf</exec_depend>
   <exec_depend>rosbag</exec_depend>
   <exec_depend>rostest</exec_depend>
+  <exec_depend>rviz</exec_depend>
   <exec_depend>python-gdown-pip</exec_depend>
 
   <export>
