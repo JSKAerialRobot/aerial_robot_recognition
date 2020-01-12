@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_view
   jsk_perception
   visualization_msgs
+  aerial_robot_recognition_msgs
 )
 
 find_package(Boost REQUIRED)
@@ -26,7 +27,7 @@ message("OPENCV ${OpenCV_VERSION} FOUND")
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cv_bridge geometry_msgs jsk_topic_tools nav_msgs roscpp rospy tf2_ros nodelet jsk_perception
+  CATKIN_DEPENDS cv_bridge geometry_msgs jsk_topic_tools nav_msgs roscpp rospy tf2_ros nodelet jsk_perception aerial_robot_recognition_msgs
 #  DEPENDS system_lib
 )
 

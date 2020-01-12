@@ -23,6 +23,7 @@
   <depend>image_view</depend>
   <depend>jsk_perception</depend>
   <depend>visualization_msgs</depend>
+  <depend>aerial_robot_recognition_msgs</depend>
 
   <exec_depend>tf</exec_depend>
   <exec_depend>rosbag</exec_depend>
