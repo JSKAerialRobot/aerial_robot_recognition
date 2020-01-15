@@ -60,9 +60,10 @@ namespace aerial_robot_perception
     tf2::Matrix3x3 camera_K_inv_;
     tf2::Matrix3x3 camera_K;
 
-    int lowest_margin_;
+    int lowest_margin_, image_width_, image_height_;
+    double object_height_, target_object_area_, target_object_area_margin_;
     
-    double object_distance, object_height_;
+    double object_distance;
     geometry_msgs::Vector3Stamped obj_pos_msg;
     tf2::Vector3 cam_target_xyz;
     cv::Mat rgb_img, depth_img;

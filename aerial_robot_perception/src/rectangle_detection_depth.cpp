@@ -9,8 +9,12 @@ namespace aerial_robot_perception
 
     pnh_->param("debug_view", debug_view_, true);
     pnh_->param("frame_id", frame_id_, std::string("target"));
+    pnh_->param("image_width", image_width_, 1280);
+    pnh_->param("image_height", image_height_, 720);
     pnh_->param("lowest_margin", lowest_margin_, 10);
     pnh_->param("object_height", object_height_, 0.20);
+    pnh_->param("target_object_area", target_object_area_, 0.06);
+    pnh_->param("target_object_area_margin", target_object_area_margin_, 0.02);
     always_subscribe_ = true;
 
     if (debug_view_) image_pub_ = advertiseImage(*pnh_, "debug_image", 1);
@@ -62,9 +66,6 @@ namespace aerial_robot_perception
   
   void RectangleDetectionDepth::depthImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
-    int image_width = 1280;
-    int image_height = 720;
-
     tf2::Transform cam_tf;
     try{
       geometry_msgs::TransformStamped cam_pose_msg = tf_buff_.lookupTransform("world", "rs_d435_color_optical_frame", ros::Time(0));
@@ -85,6 +86,8 @@ namespace aerial_robot_perception
     tf2::Matrix3x3 cam_tf_rotation(cam_tf.getRotation());
     double roll, pitch, yaw;
     cam_tf_rotation.getRPY(roll, pitch, yaw);
+
+    object_distance = cam_tf.getOrigin().z() - object_height_;
 
     cv_bridge::CvImagePtr cv_ptr;
     cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
@@ -117,25 +120,42 @@ namespace aerial_robot_perception
       cv::Point2f vertices_tmp[4];
       rects.points(vertices_tmp);  //  get rect vertices
 
-      //  draw all rects(for debug)
+      //  check whether target object or not based on its area
+      std::vector<tf2::Vector3> rect_points;
+      for(int j=0; j<3; j++){
+	tf2::Vector3 rect_point_img;
+	rect_point_img.setX(vertices_tmp[j].x);
+	rect_point_img.setY(vertices_tmp[j].y);
+	rect_point_img.setZ(1.0);
+
+	tf2::Vector3 rect_point = camera_K_inv_ * rect_point_img * object_distance;
+	rect_points.push_back(rect_point);
+      }
+
+      double rect_area = std::sqrt(std::pow((rect_points[0].x()-rect_points[1].x()), 2.0)+std::pow((rect_points[0].y()-rect_points[1].y()), 2.0)) * std::sqrt(std::pow((rect_points[1].x()-rect_points[2].x()), 2.0)+std::pow((rect_points[1].y()-rect_points[2].y()), 2.0));
+
+      rect_points.erase(rect_points.begin(), rect_points.end());
+      if(std::abs(rect_area-target_object_area_) > target_object_area_margin_) continue;
+
+      //  draw all target rects(for debug)
       if(debug_view_){
-	for (int i = 0; i < 4; i++){
-	  cv::line(rgb_img, vertices_tmp[i], vertices_tmp[(i+1)%4], cv::Scalar(255,0,0), 10);
+	for (int j=0; j<4; j++){
+	  cv::line(rgb_img, vertices_tmp[j], vertices_tmp[(j+1)%4], cv::Scalar(255,0,0), 10);
 	}
       }
       
-      int shift_x = std::abs(rects.center.x - 0.5*image_width);
-      int shift_x_before = std::abs(rect_center_x - 0.5*image_width);
+      int shift_x = std::abs(rects.center.x - 0.5*image_width_);
+      int shift_x_before = std::abs(rect_center_x - 0.5*image_width_);
       int change_y = std::abs(rects.center.y - rect_center_y);
 
       //  detect rect which is most near to the center in x axis and the lowest in the y axis
       if((shift_x < shift_x_before && change_y < std::abs(shift_x - shift_x_before)) || (rect_center_y < rects.center.y && std::abs(shift_x - shift_x_before) < change_y)){
 
 	//  exclude too low rect in y axis
-	if((image_height - vertices_tmp[0].y) < lowest_margin_) continue;
-	if((image_height - vertices_tmp[1].y) < lowest_margin_) continue;
-	if((image_height - vertices_tmp[2].y) < lowest_margin_) continue;
-	if((image_height - vertices_tmp[3].y) < lowest_margin_) continue;
+	if((image_height_ - vertices_tmp[0].y) < lowest_margin_) continue;
+	if((image_height_ - vertices_tmp[1].y) < lowest_margin_) continue;
+	if((image_height_ - vertices_tmp[2].y) < lowest_margin_) continue;
+	if((image_height_ - vertices_tmp[3].y) < lowest_margin_) continue;
 
 	rect_center_x = rects.center.x;
 	rect_center_y = rects.center.y;
@@ -147,9 +167,10 @@ namespace aerial_robot_perception
     
     //  draw target rect(for debug)
     if(debug_view_){
-      for (int i = 0; i < 4; i++){
+      for (int i=0; i<4; i++){
 	cv::line(rgb_img, vertices[i], vertices[(i+1)%4], cv::Scalar(0,255,0), 10);
       }
+      cv::imwrite("/home/kuromiya/result.png", rgb_img);
       sensor_msgs::ImagePtr rgb_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", rgb_img).toImageMsg();
       image_pub_.publish(rgb_msg);
     }
@@ -158,8 +179,6 @@ namespace aerial_robot_perception
     target_obj_uv.setX(rect_center_x);
     target_obj_uv.setY(rect_center_y);
     target_obj_uv.setZ(1.0);
-
-    object_distance = cam_tf.getOrigin().z() - object_height_;
     
     tf2::Vector3 object_pos_in_optical_frame = camera_K_inv_ * target_obj_uv * object_distance;
 
