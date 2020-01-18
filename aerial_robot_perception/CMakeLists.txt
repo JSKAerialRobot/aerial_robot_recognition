@@ -49,6 +49,7 @@ endmacro()
 arp_add_nodelet(src/ground_object_detection.cpp "aerial_robot_perception/groundObjectDetection" "ground_object_detection")
 arp_add_nodelet(src/cluttered_brick_detection.cpp "aerial_robot_perception/ClutteredBrickDetection" "cluttered_brick_detection")
 arp_add_nodelet(src/laser_line_extraction_ros.cpp "aerial_robot_perception/LaserLineExtraction" "laser_line_extraction")
+arp_add_nodelet(src/horizontal_brick_detection.cpp "aerial_robot_perception/HorizontalBrickDetection" "horizontal_brick_detection")
 arp_add_nodelet(src/rectangle_detection_depth.cpp "aerial_robot_perception/RectangleDetectionDepth" "rectangle_detection_depth")	
 
 

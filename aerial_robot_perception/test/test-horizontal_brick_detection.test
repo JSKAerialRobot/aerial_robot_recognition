@@ -1,0 +1,29 @@
+<launch>
+  <arg name="gui" default="True"/>
+
+  <include file="$(find aerial_robot_perception)/launch/horizontal_brick_detection.launch" >
+    <arg name="scan" value="/scan_shadow_filtered" />
+    <arg name="brick_width"  value="0.3" />
+    <arg name="brick_height" value="0.2" />
+    <arg name="min_split_dist" value="0.03" />
+    <arg name="min_line_points" value="5" />
+  </include>
+
+  <group if="$(arg gui)">
+    <node name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find aerial_robot_perception)/test/horizontal_brick_detection.rviz" >
+    </node>
+  </group>
+
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(find aerial_robot_perception)/test/data/2020-01-19-01-14-50_laser_scan_for_brick_detection.bag --clock -l">
+  </node>
+
+  <!-- test codes -->
+  <param name="hztest/topic" value="/line_markers" />
+  <param name="hztest/hz" value="9.0" />
+  <param name="hztest/hzerror" value="3.0" />
+  <param name="hztest/test_duration" value="10.0" />
+  <test test-name="hztest_test" pkg="rostest" type="hztest" name="hztest" />
+
+</launch>

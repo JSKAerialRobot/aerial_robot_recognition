@@ -22,6 +22,13 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='test/data/2020-01-19-01-14-50_laser_scan_for_brick_detection.bag',
+        url='https://drive.google.com/uc?id=1mHCI2nrnjX-yKnrPndmwDCtSi1J-6n4P',
+        md5='309d92925597866a56bb6f6083d924f9',
+        extract=False,
+    )
 
 if __name__ == '__main__':
     main()
