@@ -355,11 +355,9 @@ namespace line_extraction
 
     // Split indices into lines and filter out short and sparse lines
     split(filtered_indices_, verbose);
-
     if(verbose) std::cout << "size of lines: " << lines_.size() << std::endl;
 
     filterLines();
-
     // Fit each line using least squares and merge colinear lines
     for (std::vector<Line>::iterator it = lines_.begin(); it != lines_.end(); ++it)
       {
@@ -382,15 +380,21 @@ namespace line_extraction
       }
   }
 
-  void LineExtraction::setCachedData(const std::vector<double>& bearings,
-                                     const std::vector<double>& cos_bearings,
-                                     const std::vector<double>& sin_bearings,
-                                     const std::vector<unsigned int>& indices)
+  void LineExtraction::setIndices(std::vector<unsigned int> indices)
+  {
+    c_data_.indices = indices;
+  }
+
+
+  void LineExtraction::setCachedData(std::vector<double> bearings,
+                                     std::vector<double> cos_bearings,
+                                     std::vector<double> sin_bearings,
+                                     std::vector<unsigned int> indices)
   {
     c_data_.bearings = bearings;
     c_data_.cos_bearings = cos_bearings;
     c_data_.sin_bearings = sin_bearings;
-    c_data_.indices = indices;
+    setIndices(indices);
   }
 
   void LineExtraction::setRangeData(const std::vector<double>& ranges)
@@ -398,11 +402,10 @@ namespace line_extraction
     r_data_.ranges = ranges;
     r_data_.xs.clear();
     r_data_.ys.clear();
-    for (std::vector<unsigned int>::const_iterator cit = c_data_.indices.begin(); 
-         cit != c_data_.indices.end(); ++cit)
+    for (int i = 0; i < ranges.size(); i++)
       {
-        r_data_.xs.push_back(c_data_.cos_bearings[*cit] * ranges[*cit]);
-        r_data_.ys.push_back(c_data_.sin_bearings[*cit] * ranges[*cit]);
+        r_data_.xs.push_back(c_data_.cos_bearings.at(i) * ranges.at(i));
+        r_data_.ys.push_back(c_data_.sin_bearings.at(i) * ranges.at(i));
       }
   }
 
@@ -627,7 +630,6 @@ namespace line_extraction
       }
 
     if(verbose) std::cout << indices[0] << " to " << indices.back() << std::endl;
-
     Line line(c_data_, r_data_, params_, indices);
     line.endpointFit();
     double dist_max = 0;

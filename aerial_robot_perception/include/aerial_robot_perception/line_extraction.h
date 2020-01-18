@@ -149,8 +149,9 @@ namespace line_extraction
     // Run
     void extractLines(std::vector<Line>&, bool);
     // Data setting
-    void setCachedData(const std::vector<double>&, const std::vector<double>&,
-                       const std::vector<double>&, const std::vector<unsigned int>&);
+    void setCachedData(std::vector<double>, std::vector<double>,
+                       std::vector<double>, std::vector<unsigned int>);
+    void setIndices(std::vector<unsigned int> indices);
     void setRangeData(const std::vector<double>&);
     // Parameter setting
     void setBearingVariance(double);

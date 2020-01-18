@@ -57,9 +57,9 @@ namespace aerial_robot_perception
   {
 
   public:
-    LaserLineExtraction(): DiagnosticNodelet("LaserLineExtraction"), data_cached_(false) {}
+    LaserLineExtraction(std::string nodelet_name = std::string("LaserLineExtraction")): DiagnosticNodelet(nodelet_name), data_cached_(false) {}
 
-  private:
+  protected:
     ros::Subscriber scan_sub_;
     ros::Publisher line_pub_;
     ros::Time sensor_timestamp_;
@@ -74,10 +74,10 @@ namespace aerial_robot_perception
     virtual void subscribe();
     virtual void unsubscribe();
 
-    void loadParameters();
+    virtual void loadParameters();
     void publish(const std::vector<Line> &lines);
     void cacheData(const sensor_msgs::LaserScan::ConstPtr&);
-    void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr&);
+    virtual void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr&);
   };
 
 }

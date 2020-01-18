@@ -2,6 +2,7 @@
 <launch>
 
   <arg name="need_nodelet_manager" default="true" />
+  <arg name="nodelet_manager_name" default="line_extraction_nodelet" />
   <arg name="scan" default="scan" />
   <arg name="max_line_gap" default="0.5" />
   <arg name="min_line_length" default="0.1" />
@@ -14,9 +15,9 @@
   <arg name="least_sq_angle_thresh" default="0.1" />
   <arg name="least_sq_radius_thresh" default="0.1" />
 
-  <node pkg="nodelet" type="nodelet" name="line_extraction_nodelet" args="manager" output="screen" if="$(arg need_nodelet_manager)"/>
+  <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager" output="screen" if="$(arg need_nodelet_manager)"/>
 
-  <node pkg="nodelet" type="nodelet" name="laser_line_extraction" args="load aerial_robot_perception/LaserLineExtraction line_extraction_nodelet" output="screen" >
+  <node pkg="nodelet" type="nodelet" name="laser_line_extraction" args="load aerial_robot_perception/LaserLineExtraction $(arg nodelet_manager_name)" output="screen" >
 
     <remap from="scan" to="$(arg scan)"/>
 
