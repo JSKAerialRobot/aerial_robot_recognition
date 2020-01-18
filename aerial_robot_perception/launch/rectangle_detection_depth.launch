@@ -1,12 +1,10 @@
 <launch>
   <arg name="output_screen" default="true"/>
-  <arg name="image_topic" default="image" />
-  <arg name="image_depth_topic" default="image_depth" />
-  <arg name="camera_info_topic" default="cam_info" />
+  <arg name="rgb_image_topic" default="/rs_d435/color/image_rect_color" />
+  <arg name="depth_image_topic" default="/rs_d435/aligned_depth_to_color/image_raw" />
+  <arg name="camera_info_topic" default="/rs_d435/aligned_depth_to_color/camera_info" />
   <arg name="debug_view" default="true"/>
-  <arg name="marker_debug" default="true"/>
   <arg name="frame_id" default="target_object"/>
-  <arg name="camera" default="rs_d435"/>
   <arg name="gui" default="true"/>
 
   <node pkg="nodelet" type="nodelet" name="rectangle_detection_depth_nodelet" args="manager" output="screen" if="$(arg output_screen)"/>
@@ -14,10 +12,9 @@
   <node pkg="nodelet" type="nodelet" name="rectangle_detection_depth"
         args="load aerial_robot_perception/RectangleDetectionDepth rectangle_detection_depth_nodelet" output="screen">
 
-    <remap from="rgb_img" to="/rs_d435/color/image_rect_color" />
-    <remap from="depth_image" to="/rs_d435/aligned_depth_to_color/image_raw" />
-    <remap from="cam_info" to="/rs_d435/aligned_depth_to_color/camera_info" />
-    
+    <remap from="rgb_img" to="$(arg rgb_image_topic)" />
+    <remap from="depth_image" to="$(arg depth_image_topic)" />
+    <remap from="cam_info" to="$(arg camera_info_topic)" />
     <param name="debug_view" value="$(arg debug_view)"/>
     <param name="frame_id" value="$(arg frame_id)"/>
   </node>
