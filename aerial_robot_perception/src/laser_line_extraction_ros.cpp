@@ -64,7 +64,7 @@ namespace aerial_robot_perception
       max_line_gap, min_line_length, min_range, min_split_dist, outlier_dist;
     int min_line_points;
 
-    ROS_ERROR("nodename is %s", pnh_->getNamespace().c_str());
+    ROS_DEBUG("nodename is %s", pnh_->getNamespace().c_str());
     pnh_->param("bearing_std_dev", bearing_std_dev, 1e-3);
     line_extraction_.setBearingVariance(bearing_std_dev * bearing_std_dev);
     ROS_DEBUG("bearing_std_dev: %f", bearing_std_dev);
