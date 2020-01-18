@@ -143,9 +143,7 @@ namespace aerial_robot_perception
   {
     std::vector<double> bearings, cos_bearings, sin_bearings;
     std::vector<unsigned int> indices;
-    const std::size_t num_measurements = std::ceil(
-                                                   (scan_msg->angle_max - scan_msg->angle_min) / scan_msg->angle_increment);
-    for (std::size_t i = 0; i < num_measurements; ++i)
+    for (std::size_t i = 0; i < scan_msg->ranges.size(); ++i)
       {
         const double b = scan_msg->angle_min + i * scan_msg->angle_increment;
         bearings.push_back(b);
