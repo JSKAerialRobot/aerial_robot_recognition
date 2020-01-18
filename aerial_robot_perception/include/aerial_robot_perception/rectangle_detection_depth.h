@@ -3,21 +3,20 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <limits>
 #include <random>
+#include <cmath>
 #include <unistd.h>
 #include <ros/ros.h>
 #include <ros/topic.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/image_encodings.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/Int32.h>
-#include "std_msgs/MultiArrayLayout.h"
-#include "std_msgs/MultiArrayDimension.h"
-#include "std_msgs/Int32MultiArray.h"
 #include <geometry_msgs/TransformStamped.h>
-#include <geometry_msgs/Point.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseArray.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -36,7 +35,7 @@ namespace aerial_robot_perception
 
   protected:
     /* ros publisher */
-    ros::Publisher target_pub_;  
+    ros::Publisher target_pub_;
     image_transport::Publisher image_pub_;
 
     /* ros subscriber */
@@ -55,22 +54,21 @@ namespace aerial_robot_perception
     /* ros param */
     bool debug_view_;
     std::string frame_id_;
-    
+
     double real_size_scale_;
     tf2::Matrix3x3 camera_K_inv_;
     tf2::Matrix3x3 camera_K;
 
-    int lowest_margin_;
-    
-    double object_distance, object_height_;
-    geometry_msgs::Vector3Stamped obj_pos_msg;
-    tf2::Vector3 cam_target_xyz;
-    cv::Mat rgb_img, depth_img;
+    int lowest_margin_, image_width_, image_height_;
+    double object_height_, target_object_area_, target_object_area_margin_;
+
+    cv::Mat rgb_img_;
+    std::string camera_optical_frame_name_;
 
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
     void depthImageCallback(const sensor_msgs::ImageConstPtr& msg);
     void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg);
-    
+
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
