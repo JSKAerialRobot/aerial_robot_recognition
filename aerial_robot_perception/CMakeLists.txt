@@ -51,6 +51,8 @@ arp_add_nodelet(src/cluttered_brick_detection.cpp "aerial_robot_perception/Clutt
 arp_add_nodelet(src/laser_line_extraction_ros.cpp "aerial_robot_perception/LaserLineExtraction" "laser_line_extraction")
 arp_add_nodelet(src/rectangle_detection_depth.cpp "aerial_robot_perception/RectangleDetectionDepth" "rectangle_detection_depth")
 arp_add_nodelet(src/depth_distance_filter.cpp "aerial_robot_perception/DepthDistanceFilter" "depth_distance_filter")
+arp_add_nodelet(src/horizontal_brick_detection.cpp "aerial_robot_perception/HorizontalBrickDetection" "horizontal_brick_detection")
+
 
 add_library(${PROJECT_NAME} SHARED ${aerial_robot_perception_nodelet_sources} src/line_extraction.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})

@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2019, JSK Lab
+ *  Copyright (c) 2017, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,49 +35,42 @@
 
 #pragma once
 
-#include <aerial_robot_perception/line_extraction.h>
+#include <aerial_robot_perception/laser_line_extraction_ros.h>
 #include <algorithm>
-#include <Eigen/Dense>
-#include <geometry_msgs/Point.h>
-#include <iostream>
+#include <geometry_msgs/TransformStamped.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <opencv2/opencv.hpp>
 #include <ros/ros.h>
 #include <ros/topic.h>
-#include <sensor_msgs/LaserScan.h>
-#include <string>
-#include <vector>
-#include <visualization_msgs/Marker.h>
-
-using namespace line_extraction;
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <visualization_msgs/MarkerArray.h>
 
 namespace aerial_robot_perception
 {
-
-  class LaserLineExtraction: public jsk_topic_tools::DiagnosticNodelet
+  class HorizontalBrickDetection: public aerial_robot_perception::LaserLineExtraction
   {
-
   public:
-    LaserLineExtraction(std::string nodelet_name = std::string("LaserLineExtraction")): DiagnosticNodelet(nodelet_name), data_cached_(false) {}
-
+    HorizontalBrickDetection(): aerial_robot_perception::LaserLineExtraction("HorizontalBrickDetection"){}
   protected:
-    ros::Subscriber scan_sub_;
-    ros::Publisher line_pub_;
-    ros::Time sensor_timestamp_;
 
-    std::string frame_id_;
-    bool verbose_;
+    void onInit() override;
+    void subscribe() override;
+    void unsubscribe() override;
 
-    LineExtraction line_extraction_;
-    bool data_cached_; // true after first scan used to cache data
+    /* ros publisher */
+    ros::Publisher objects_marker_pub_;
 
-    virtual void onInit();
-    virtual void subscribe();
-    virtual void unsubscribe();
+    /* tf */
+    tf2_ros::TransformBroadcaster tf_br_;
 
-    virtual void loadParameters();
-    void publish(const std::vector<Line> &lines);
-    void cacheData(const sensor_msgs::LaserScan::ConstPtr&);
-    virtual void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr&);
+    /* brick  */
+    double brick_width_, brick_height_;
+    double line_estimate_error_;
+
+    void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr&) override;
+    void loadParameters() override;
+
+    void publish(const std::vector<Line> &lines, const std::vector<tf2::Transform> &objects_tf);
   };
-
-}
+};

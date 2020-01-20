@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-
   <arg name="need_nodelet_manager" default="true" />
-  <arg name="nodelet_manager_name" default="line_extraction_nodelet" />
+  <arg name="nodelet_manager_name" default="horizontal_brick_detection_nodelet" />
+
+  <!-- parameters for laser line extraction -->
   <arg name="scan" default="scan" />
   <arg name="max_line_gap" default="0.5" />
   <arg name="min_line_length" default="0.1" />
   <arg name="min_range" default="0.01" />
-  <arg name="min_split_dist" default="0.1" />
+  <arg name="min_split_dist" default="0.05" />
   <arg name="min_line_points" default="10" />
   <arg name="outlier_dist" default="0.1" />
   <arg name="bearing_std_dev" default="0.01" />
@@ -15,12 +16,17 @@
   <arg name="least_sq_angle_thresh" default="0.1" />
   <arg name="least_sq_radius_thresh" default="0.1" />
 
+  <arg name="line_estimate_error" default="0.02" />
+  <arg name="brick_width"  default="0.1" />
+  <arg name="brick_height" default="0.1" />
+
   <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager" output="screen" if="$(arg need_nodelet_manager)"/>
 
-  <node pkg="nodelet" type="nodelet" name="laser_line_extraction" args="load aerial_robot_perception/LaserLineExtraction $(arg nodelet_manager_name)" output="screen" >
+  <node pkg="nodelet" type="nodelet" name="horizotnal_brick_detection" args="load aerial_robot_perception/HorizontalBrickDetection $(arg nodelet_manager_name)" output="screen" >
 
     <remap from="scan" to="$(arg scan)"/>
 
+    <!-- line extraction -->
     <param name="max_line_gap" value="$(arg max_line_gap)" />
     <param name="min_line_length" value="$(arg min_line_length)" />
     <param name="min_range" value="$(arg min_range)" />
@@ -31,6 +37,12 @@
     <param name="range_std_dev" value="$(arg range_std_dev)" />
     <param name="least_sq_angle_thresh" value="$(arg least_sq_angle_thresh)" />
     <param name="least_sq_radius_thresh" value="$(arg least_sq_radius_thresh)" />
+
+    <!-- brick fitting -->
+    <param name="brick_width"  value="$(arg brick_width)" />
+    <param name="brick_height" value="$(arg brick_height)" />
+    <param name="line_estimate_error" value="$(arg line_estimate_error)" />
   </node>
+
 
 </launch>

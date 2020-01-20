@@ -64,7 +64,7 @@ namespace aerial_robot_perception
       max_line_gap, min_line_length, min_range, min_split_dist, outlier_dist;
     int min_line_points;
 
-    ROS_ERROR("nodename is %s", pnh_->getNamespace().c_str());
+    ROS_DEBUG("nodename is %s", pnh_->getNamespace().c_str());
     pnh_->param("bearing_std_dev", bearing_std_dev, 1e-3);
     line_extraction_.setBearingVariance(bearing_std_dev * bearing_std_dev);
     ROS_DEBUG("bearing_std_dev: %f", bearing_std_dev);
@@ -143,9 +143,7 @@ namespace aerial_robot_perception
   {
     std::vector<double> bearings, cos_bearings, sin_bearings;
     std::vector<unsigned int> indices;
-    const std::size_t num_measurements = std::ceil(
-                                                   (scan_msg->angle_max - scan_msg->angle_min) / scan_msg->angle_increment);
-    for (std::size_t i = 0; i < num_measurements; ++i)
+    for (std::size_t i = 0; i < scan_msg->ranges.size(); ++i)
       {
         const double b = scan_msg->angle_min + i * scan_msg->angle_increment;
         bearings.push_back(b);
