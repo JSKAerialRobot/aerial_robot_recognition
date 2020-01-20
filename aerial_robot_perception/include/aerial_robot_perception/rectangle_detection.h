@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <sstream>
 #include <limits>
-#include <random>
 #include <cmath>
 #include <unistd.h>
 #include <ros/ros.h>
@@ -28,19 +27,19 @@
 
 namespace aerial_robot_perception
 {
-  class RectangleDetectionDepth: public jsk_topic_tools::DiagnosticNodelet
+  class RectangleDetection: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    RectangleDetectionDepth(): DiagnosticNodelet("RectangleDetectionDepth"){}
+    RectangleDetection(): DiagnosticNodelet("RectangleDetectionDepth"){}
 
   protected:
     /* ros publisher */
     ros::Publisher target_pub_;
-    image_transport::Publisher image_pub_;
+    image_transport::Publisher debug_image_pub_;
 
     /* ros subscriber */
-    image_transport::Subscriber image_sub_;
-    image_transport::Subscriber depth_image_sub_;
+    image_transport::Subscriber rgb_image_sub_;
+    image_transport::Subscriber mask_image_sub_;
     ros::Subscriber cam_info_sub_;
 
     /* image transport */
@@ -65,8 +64,8 @@ namespace aerial_robot_perception
     cv::Mat rgb_img_;
     std::string camera_optical_frame_name_;
 
-    void imageCallback(const sensor_msgs::ImageConstPtr& msg);
-    void depthImageCallback(const sensor_msgs::ImageConstPtr& msg);
+    void rgbImageCallback(const sensor_msgs::ImageConstPtr& msg);
+    void maskImageCallback(const sensor_msgs::ImageConstPtr& msg);
     void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg);
 
     virtual void onInit();
