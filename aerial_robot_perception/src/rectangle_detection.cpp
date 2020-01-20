@@ -60,7 +60,7 @@ namespace aerial_robot_perception
   void RectangleDetection::rgbImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     cv_bridge::CvImagePtr cv_ptr;
-    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
     rgb_img_ = cv_ptr->image;
   }
 
@@ -121,7 +121,7 @@ namespace aerial_robot_perception
     }
 
     if (rects.size() == 0) {
-      NODELET_DEBUG_STREAM("no valid rects");
+      NODELET_DEBUG_STREAM("no valid size rects");
       return; // no rects -> return
     }
 
@@ -141,6 +141,11 @@ namespace aerial_robot_perception
       if (rect_ok) {
         passed_rects.push_back(rect);
       }
+    }
+
+    if (passed_rects.size() == 0) {
+      NODELET_DEBUG_STREAM("no valid position rects");
+      return; // no rects -> return
     }
 
     //publish poses of rectangles
