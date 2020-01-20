@@ -211,7 +211,7 @@ namespace aerial_robot_perception
         cv::Point2f arrow_point = cv::Point2f(50.0 * std::cos(angles[i]), 50.0 * std::sin(angles[i])) + passed_rects[i].center;
         cv::arrowedLine(debug_img, passed_rects[i].center, arrow_point, cv::Scalar(0, 0, 0), 3, CV_AA, 0, 0.4);
       }
-      sensor_msgs::ImagePtr debug_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", debug_img).toImageMsg();
+      sensor_msgs::ImagePtr debug_img_msg = cv_bridge::CvImage(msg->header, "bgr8", debug_img).toImageMsg();
       debug_image_pub_.publish(debug_img_msg);
     }
 
