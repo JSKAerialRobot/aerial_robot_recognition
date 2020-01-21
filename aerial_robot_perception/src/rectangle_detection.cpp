@@ -1,9 +1,9 @@
-#include <aerial_robot_perception/rectangle_detection_depth.h>
+#include <aerial_robot_perception/rectangle_detection.h>
 
 namespace aerial_robot_perception
 {
 
-  void RectangleDetectionDepth::onInit()
+  void RectangleDetection::onInit()
   {
     DiagnosticNodelet::onInit();
 
@@ -13,12 +13,11 @@ namespace aerial_robot_perception
     pnh_->param("object_height", object_height_, 0.20);
     pnh_->param("target_object_area", target_object_area_, 0.06);
     pnh_->param("target_object_area_margin", target_object_area_margin_, 0.02);
-    always_subscribe_ = true;
 
-    if (debug_view_) image_pub_ = advertiseImage(*pnh_, "debug_image", 1);
+    if (debug_view_) debug_image_pub_ = advertiseImage(*pnh_, "debug_image", 1);
     target_pub_ = advertise<geometry_msgs::PoseArray>(*pnh_, frame_id_, 1);
 
-    it_ = boost::make_shared<image_transport::ImageTransport>(*nh_);
+    it_ = boost::make_shared<image_transport::ImageTransport>(*pnh_);
     tf_ls_ = boost::make_shared<tf2_ros::TransformListener>(tf_buff_);
 
     ros::Duration(1.0).sleep();
@@ -26,20 +25,21 @@ namespace aerial_robot_perception
     onInitPostProcess();
   }
 
-  void RectangleDetectionDepth::subscribe()
+  void RectangleDetection::subscribe()
   {
-    if(debug_view_) image_sub_ = it_->subscribe("rgb_img", 1, &RectangleDetectionDepth::imageCallback, this);
-    depth_image_sub_ = it_->subscribe("depth_image", 1, &RectangleDetectionDepth::depthImageCallback, this);
-    cam_info_sub_ = nh_->subscribe("cam_info", 1, &RectangleDetectionDepth::cameraInfoCallback, this);
+    if(debug_view_) rgb_image_sub_ = it_->subscribe("rgb_img", 1, &RectangleDetection::rgbImageCallback, this);
+    mask_image_sub_ = it_->subscribe("input", 1, &RectangleDetection::maskImageCallback, this);
+    cam_info_sub_ = pnh_->subscribe("cam_info", 1, &RectangleDetection::cameraInfoCallback, this);
   }
 
-  void RectangleDetectionDepth::unsubscribe()
+  void RectangleDetection::unsubscribe()
   {
-    image_sub_.shutdown();
+    rgb_image_sub_.shutdown();
+    mask_image_sub_.shutdown();
   }
 
 
-  void RectangleDetectionDepth::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg)
+  void RectangleDetection::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg)
   {
     /* the following process is executed once */
     NODELET_DEBUG_STREAM("receive camera info");
@@ -57,16 +57,21 @@ namespace aerial_robot_perception
   }
 
 
-  void RectangleDetectionDepth::imageCallback(const sensor_msgs::ImageConstPtr& msg)
+  void RectangleDetection::rgbImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     cv_bridge::CvImagePtr cv_ptr;
-    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
     rgb_img_ = cv_ptr->image;
   }
 
 
-  void RectangleDetectionDepth::depthImageCallback(const sensor_msgs::ImageConstPtr& msg)
+  void RectangleDetection::maskImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
+    if(real_size_scale_ == 0) {
+      NODELET_DEBUG_STREAM("real_size_scale is 0");
+      return;
+    }
+
     tf2::Transform cam_tf;
     try {
       geometry_msgs::TransformStamped cam_pose_msg = tf_buff_.lookupTransform("world", camera_optical_frame_name_, ros::Time(0), ros::Duration(0.1));
@@ -76,35 +81,18 @@ namespace aerial_robot_perception
       return;
     }
 
-    cv::Mat depth_org = cv_bridge::toCvCopy(msg, msg->encoding)->image;
-    cv::normalize(depth_org, depth_org, 255, 0, cv::NORM_MINMAX);
-    cv::Mat depth_img;
-    depth_org.convertTo(depth_img, CV_8UC1);
-    depth_img = ~depth_img;
-
-    if(real_size_scale_ == 0) return;
-
-    double object_distance = cam_tf.getOrigin().z() - object_height_;
-
-    cv_bridge::CvImagePtr cv_ptr;
-    cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
+    cv::Mat mask_img = cv_bridge::toCvCopy(msg, msg->encoding)->image;
 
     std::vector<std::vector<cv::Point>> contours;
-    cv::Mat bin_img;
-    cv::threshold(depth_img, bin_img, 0, 255, cv::THRESH_BINARY|cv::THRESH_OTSU);
-
-    //  erosion(to remove lane lines)
-    cv::Mat erode_img;
-    cv::erode(bin_img, erode_img, cv::Mat(), cv::Point(-1, -1), 3);
-
     std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(erode_img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);  //  find all contours
+    cv::findContours(mask_img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);  //  find all contours
 
     if (contours.size() == 0) {
       NODELET_DEBUG_STREAM("no contours");
       return;  //  no contours -> return
     }
 
+    double object_distance = cam_tf.getOrigin().z() - object_height_;
     std::vector<cv::RotatedRect> rects;
     for (int i = 0; i < contours.size(); i++) {
       cv::Mat input_points;
@@ -133,7 +121,7 @@ namespace aerial_robot_perception
     }
 
     if (rects.size() == 0) {
-      NODELET_DEBUG_STREAM("no valid rects");
+      NODELET_DEBUG_STREAM("no valid size rects");
       return; // no rects -> return
     }
 
@@ -153,6 +141,11 @@ namespace aerial_robot_perception
       if (rect_ok) {
         passed_rects.push_back(rect);
       }
+    }
+
+    if (passed_rects.size() == 0) {
+      NODELET_DEBUG_STREAM("no valid position rects");
+      return; // no rects -> return
     }
 
     //publish poses of rectangles
@@ -223,8 +216,8 @@ namespace aerial_robot_perception
         cv::Point2f arrow_point = cv::Point2f(50.0 * std::cos(angles[i]), 50.0 * std::sin(angles[i])) + passed_rects[i].center;
         cv::arrowedLine(debug_img, passed_rects[i].center, arrow_point, cv::Scalar(0, 0, 0), 3, CV_AA, 0, 0.4);
       }
-      sensor_msgs::ImagePtr debug_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", debug_img).toImageMsg();
-      image_pub_.publish(debug_img_msg);
+      sensor_msgs::ImagePtr debug_img_msg = cv_bridge::CvImage(msg->header, "bgr8", debug_img).toImageMsg();
+      debug_image_pub_.publish(debug_img_msg);
     }
 
 
@@ -232,4 +225,4 @@ namespace aerial_robot_perception
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (aerial_robot_perception::RectangleDetectionDepth, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (aerial_robot_perception::RectangleDetection, nodelet::Nodelet);

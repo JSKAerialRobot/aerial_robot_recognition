@@ -15,8 +15,8 @@
          base_class_type="nodelet::Nodelet">
   </class>
   
-  <class name="aerial_robot_perception/RectangleDetectionDepth"
-         type="aerial_robot_perception::RectangleDetectionDepth"
+  <class name="aerial_robot_perception/RectangleDetection"
+         type="aerial_robot_perception::RectangleDetection"
          base_class_type="nodelet::Nodelet">
   </class>
 

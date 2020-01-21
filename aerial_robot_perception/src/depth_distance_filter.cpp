@@ -59,7 +59,7 @@ namespace aerial_robot_perception
     cv::Mat output_img;
     depth_img.convertTo(output_img, CV_8UC1);
 
-    sensor_msgs::ImagePtr output_img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", output_img).toImageMsg();
+    sensor_msgs::ImagePtr output_img_msg = cv_bridge::CvImage(msg->header, "mono8", output_img).toImageMsg();
     image_pub_.publish(output_img_msg);
   }
 }
