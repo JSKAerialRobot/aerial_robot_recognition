@@ -24,6 +24,8 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_recognition_utils/sensor_model/camera_depth_sensor.h>
+#include <dynamic_reconfigure/server.h>
+#include <aerial_robot_perception/RectangleDetectionConfig.h>
 
 namespace aerial_robot_perception
 {
@@ -43,12 +45,15 @@ namespace aerial_robot_perception
     ros::Subscriber cam_info_sub_;
 
     /* image transport */
-    boost::shared_ptr<image_transport::ImageTransport> it_;
+    std::shared_ptr<image_transport::ImageTransport> it_;
 
     /* tf */
     tf2_ros::TransformBroadcaster tf_br_;
     tf2_ros::Buffer tf_buff_;
-    boost::shared_ptr<tf2_ros::TransformListener> tf_ls_;
+    std::shared_ptr<tf2_ros::TransformListener> tf_ls_;
+
+    /* dynamic reconfigure */
+    std::shared_ptr<dynamic_reconfigure::Server<aerial_robot_perception::RectangleDetectionConfig> > dr_server_;
 
     /* ros param */
     bool debug_view_;
@@ -67,6 +72,7 @@ namespace aerial_robot_perception
     void rgbImageCallback(const sensor_msgs::ImageConstPtr& msg);
     void maskImageCallback(const sensor_msgs::ImageConstPtr& msg);
     void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg);
+    void reconfigureCallback(aerial_robot_perception::RectangleDetectionConfig &config, uint32_t level);
 
     virtual void onInit();
     virtual void subscribe();

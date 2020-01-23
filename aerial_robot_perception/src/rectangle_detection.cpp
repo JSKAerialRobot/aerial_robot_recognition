@@ -17,8 +17,12 @@ namespace aerial_robot_perception
     if (debug_view_) debug_image_pub_ = advertiseImage(*pnh_, "debug_image", 1);
     target_pub_ = advertise<geometry_msgs::PoseArray>(*pnh_, frame_id_, 1);
 
-    it_ = boost::make_shared<image_transport::ImageTransport>(*pnh_);
-    tf_ls_ = boost::make_shared<tf2_ros::TransformListener>(tf_buff_);
+    it_ = std::make_shared<image_transport::ImageTransport>(*pnh_);
+    tf_ls_ = std::make_shared<tf2_ros::TransformListener>(tf_buff_);
+
+    dr_server_ = std::make_shared<dynamic_reconfigure::Server<aerial_robot_perception::RectangleDetectionConfig> >(*pnh_);
+    dynamic_reconfigure::Server<aerial_robot_perception::RectangleDetectionConfig>::CallbackType f = boost::bind(&RectangleDetection::reconfigureCallback, this, _1, _2);
+    dr_server_->setCallback(f);
 
     ros::Duration(1.0).sleep();
 
@@ -221,6 +225,14 @@ namespace aerial_robot_perception
     }
 
 
+  }
+
+  void RectangleDetection::reconfigureCallback(aerial_robot_perception::RectangleDetectionConfig &config, uint32_t level)
+  {
+    lowest_margin_ = config.lowest_margin;
+    object_height_ = config.object_height;
+    target_object_area_ = config.target_object_area;
+    target_object_area_margin_ = config.target_object_area_margin;
   }
 }
 
