@@ -56,6 +56,7 @@ arp_add_nodelet(src/laser_line_extraction_ros.cpp "aerial_robot_perception/Laser
 arp_add_nodelet(src/rectangle_detection.cpp "aerial_robot_perception/RectangleDetection" "rectangle_detection")
 arp_add_nodelet(src/depth_distance_filter.cpp "aerial_robot_perception/DepthDistanceFilter" "depth_distance_filter")
 arp_add_nodelet(src/horizontal_brick_detection.cpp "aerial_robot_perception/HorizontalBrickDetection" "horizontal_brick_detection")
+arp_add_nodelet(src/lane_cluster_detection.cpp "aerial_robot_perception/LaneClusterDetection" "lane_cluster_detection")
 
 
 add_library(${PROJECT_NAME} SHARED ${aerial_robot_perception_nodelet_sources} src/line_extraction.cpp)
