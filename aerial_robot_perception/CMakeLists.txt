@@ -17,11 +17,15 @@ find_package(catkin REQUIRED COMPONENTS
   image_view
   jsk_perception
   visualization_msgs
+  dynamic_reconfigure
 )
 
 find_package(Boost REQUIRED)
 find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")
+
+generate_dynamic_reconfigure_options(
+    cfg/RectangleDetection.cfg)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -56,6 +60,7 @@ arp_add_nodelet(src/horizontal_brick_detection.cpp "aerial_robot_perception/Hori
 
 add_library(${PROJECT_NAME} SHARED ${aerial_robot_perception_nodelet_sources} src/line_extraction.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_LIBRARIES})

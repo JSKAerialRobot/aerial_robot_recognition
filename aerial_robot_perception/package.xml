@@ -24,6 +24,7 @@
   <depend>jsk_perception</depend>
   <depend>pointcloud_to_laserscan</depend>
   <depend>visualization_msgs</depend>
+  <depend>dynamic_reconfigure</depend>
 
   <exec_depend>tf</exec_depend>
   <exec_depend>rosbag</exec_depend>
