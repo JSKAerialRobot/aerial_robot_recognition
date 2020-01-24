@@ -1,18 +1,11 @@
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include <limits>
-#include <cmath>
-#include <unistd.h>
 #include <ros/ros.h>
-#include <ros/topic.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
-#include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseArray.h>
@@ -23,7 +16,6 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <jsk_recognition_utils/sensor_model/camera_depth_sensor.h>
 #include <dynamic_reconfigure/server.h>
 #include <aerial_robot_perception/RectangleDetectionConfig.h>
 
@@ -67,6 +59,7 @@ namespace aerial_robot_perception
     double object_height_, target_object_area_, target_object_area_margin_;
 
     cv::Mat rgb_img_;
+    std::string rgb_img_encoding_;
     std::string camera_optical_frame_name_;
 
     void rgbImageCallback(const sensor_msgs::ImageConstPtr& msg);
