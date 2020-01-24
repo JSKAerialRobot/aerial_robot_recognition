@@ -25,7 +25,8 @@ find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")
 
 generate_dynamic_reconfigure_options(
-    cfg/RectangleDetection.cfg)
+  cfg/RectangleDetection.cfg
+  cfg/DepthDistanceFilter.cfg)
 
 catkin_package(
   INCLUDE_DIRS include
