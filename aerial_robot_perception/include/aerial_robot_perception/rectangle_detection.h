@@ -60,7 +60,6 @@ namespace aerial_robot_perception
 
     cv::Mat rgb_img_;
     std::string rgb_img_encoding_;
-    std::string camera_optical_frame_name_;
 
     void rgbImageCallback(const sensor_msgs::ImageConstPtr& msg);
     void maskImageCallback(const sensor_msgs::ImageConstPtr& msg);
