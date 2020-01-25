@@ -72,6 +72,9 @@ namespace aerial_robot_perception
 
   void RectangleDetection::maskImageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
+    bool detect_succeeded_ = true;
+    std::string fail_msg_;
+
     if(real_size_scale_ == 0) {
       NODELET_DEBUG_STREAM("real_size_scale is 0");
       return;
@@ -94,7 +97,8 @@ namespace aerial_robot_perception
 
     if (contours.size() == 0) {
       NODELET_DEBUG_STREAM("no contours");
-      return;  //  no contours -> return
+      fail_msg_ = std::string("no contours");
+      detect_succeeded_ = false;
     }
 
     double object_distance = cam_tf.getOrigin().z() - object_height_;
@@ -125,9 +129,10 @@ namespace aerial_robot_perception
       rects.push_back(rect);
     }
 
-    if (rects.size() == 0) {
+    if (detect_succeeded_ && rects.size() == 0) {
       NODELET_DEBUG_STREAM("no valid size rects");
-      return; // no rects -> return
+      fail_msg_ = std::string("no valid size rects");
+      detect_succeeded_ = false;
     }
 
     //exclude too low lect in x & y axis
@@ -148,9 +153,10 @@ namespace aerial_robot_perception
       }
     }
 
-    if (passed_rects.size() == 0) {
+    if (detect_succeeded_ && passed_rects.size() == 0) {
       NODELET_DEBUG_STREAM("no valid position rects");
-      return; // no rects -> return
+      fail_msg_ = std::string("no valid position rects");
+      detect_succeeded_ = false;
     }
 
     //publish poses of rectangles
@@ -212,14 +218,21 @@ namespace aerial_robot_perception
     if (debug_view_) {
       cv::Mat debug_img;
       rgb_img_.copyTo(debug_img);
-      for (int i = 0; i < passed_rects.size(); ++i) {
-        cv::Point2f vertices[4];
-        passed_rects[i].points(vertices);
-        for (int i = 0; i < 4; ++i) {
-          cv::line(debug_img, vertices[i], vertices[(i+1)%4], cv::Scalar(255,0,0), 10); //blue
+
+      if (!passed_rects.empty()) {
+        for (int i = 0; i < passed_rects.size(); ++i) {
+          cv::Point2f vertices[4];
+          passed_rects[i].points(vertices);
+          for (int i = 0; i < 4; ++i) {
+            cv::line(debug_img, vertices[i], vertices[(i+1)%4], cv::Scalar(255,0,0), 10); //blue
+          }
+          cv::Point2f arrow_point = cv::Point2f(50.0 * std::cos(angles[i]), 50.0 * std::sin(angles[i])) + passed_rects[i].center;
+          cv::arrowedLine(debug_img, passed_rects[i].center, arrow_point, cv::Scalar(0, 0, 0), 3, CV_AA, 0, 0.4);
         }
-        cv::Point2f arrow_point = cv::Point2f(50.0 * std::cos(angles[i]), 50.0 * std::sin(angles[i])) + passed_rects[i].center;
-        cv::arrowedLine(debug_img, passed_rects[i].center, arrow_point, cv::Scalar(0, 0, 0), 3, CV_AA, 0, 0.4);
+      } else {
+        //no rects
+        //cv::putText(debug_img, "no rect", cv::Point(0, 0), cv::FONT_HERSHEY_PLAIN, 100, cv::Scalar(0, 0, 0), 3);
+        cv::putText(debug_img, fail_msg_.c_str(), cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1.2, cv::Scalar(0,0,200), 2, CV_AA);
       }
       sensor_msgs::ImagePtr debug_img_msg = cv_bridge::CvImage(msg->header, rgb_img_encoding_, debug_img).toImageMsg();
       debug_image_pub_.publish(debug_img_msg);
