@@ -56,7 +56,6 @@ namespace aerial_robot_perception
     image_height_ = msg->height;
     image_width_ = msg->width;
     real_size_scale_ = msg->K[0] * msg->K[4];
-    camera_optical_frame_name_ = msg->header.frame_id;
     cam_info_sub_.shutdown();
   }
 
@@ -82,7 +81,7 @@ namespace aerial_robot_perception
 
     tf2::Transform cam_tf;
     try {
-      geometry_msgs::TransformStamped cam_pose_msg = tf_buff_.lookupTransform("world", camera_optical_frame_name_, ros::Time(0), ros::Duration(0.1));
+      geometry_msgs::TransformStamped cam_pose_msg = tf_buff_.lookupTransform("world", msg->header.frame_id, ros::Time(0), ros::Duration(0.1));
       tf2::convert(cam_pose_msg.transform, cam_tf);
     } catch (tf2::TransformException &ex) {
       ROS_WARN("%s", ex.what());
@@ -163,7 +162,6 @@ namespace aerial_robot_perception
     int obj_count = 0;
     geometry_msgs::PoseArray pose_array_msg;
     pose_array_msg.header = msg->header;
-    pose_array_msg.header.frame_id = camera_optical_frame_name_;
     std::vector<double> angles;
 
     for (const auto& rect : passed_rects) {
@@ -195,7 +193,6 @@ namespace aerial_robot_perception
 
       geometry_msgs::TransformStamped obj_tf_msg;
       obj_tf_msg.header = msg->header;
-      obj_tf_msg.header.frame_id = camera_optical_frame_name_;
       obj_tf_msg.child_frame_id = frame_id_ + ss.str();
       obj_tf_msg.transform.translation = tf2::toMsg(object_pos_in_optical_frame);
       tf2::Quaternion q;
