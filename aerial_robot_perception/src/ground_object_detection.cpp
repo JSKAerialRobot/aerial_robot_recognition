@@ -91,7 +91,7 @@ namespace aerial_robot_perception
 
     tf2::Transform cam_tf;
     try{
-      geometry_msgs::TransformStamped cam_pose_msg = tf_buff_.lookupTransform("world", msg->header.frame_id, msg->header.stamp);
+      geometry_msgs::TransformStamped cam_pose_msg = tf_buff_.lookupTransform("world", msg->header.frame_id, msg->header.stamp, ros::Duration(0.2));
       tf2::convert(cam_pose_msg.transform, cam_tf);
     }
     catch (tf2::TransformException &ex) {
