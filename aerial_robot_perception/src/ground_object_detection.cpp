@@ -147,7 +147,9 @@ namespace aerial_robot_perception
     if (dist_from_center_min != 1e6) {
       if (debug_view_) {
         cv::Mat debug_image = cv::Mat::zeros(src_image.rows, src_image.cols, CV_8U);
-        cv::drawContours(debug_image, std::vector<std::vector<cv::Point> >(contours), -1, cv::Scalar(255, 255, 255), -1);
+        std::vector<std::vector<cv::Point> > draw_contour;
+        draw_contour.push_back(target_contour);
+        cv::drawContours(debug_image, draw_contour, -1, cv::Scalar(255, 255, 255), -1);
         image_pub_.publish(cv_bridge::CvImage(msg->header, sensor_msgs::image_encodings::MONO8, debug_image).toImageMsg());
       }
 
