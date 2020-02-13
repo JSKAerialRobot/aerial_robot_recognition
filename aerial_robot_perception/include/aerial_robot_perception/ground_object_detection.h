@@ -82,6 +82,7 @@ namespace aerial_robot_perception
     double contour_area_size_, contour_area_margin_;
     double object_height_;
     double contour_area_min_thre;
+    bool all_contour_;
 
     bool debug_view_;
     std::string frame_id_;

@@ -48,6 +48,7 @@ namespace aerial_robot_perception
     pnh_->param("object_height", object_height_, 0.05);
     pnh_->param("debug_view", debug_view_, false);
     pnh_->param("frame_id", frame_id_, std::string("target_object"));
+    pnh_->param("all_contour", all_contour_, false);
     always_subscribe_ = true; //because of no subscriber
 
     target_pos_pub_ = advertise<geometry_msgs::Vector3Stamped>(*nh_, frame_id_ + std::string("/pos"), 1);
@@ -147,13 +148,26 @@ namespace aerial_robot_perception
     if (dist_from_center_min != 1e6) {
       if (debug_view_) {
         cv::Mat debug_image = cv::Mat::zeros(src_image.rows, src_image.cols, CV_8U);
-        std::vector<std::vector<cv::Point> > draw_contour;
-        draw_contour.push_back(target_contour);
-        cv::drawContours(debug_image, draw_contour, -1, cv::Scalar(255, 255, 255), -1);
+
+        if (all_contour_) {
+          cv::drawContours(debug_image, contours, -1, cv::Scalar(255, 255, 255), -1);
+        } else {
+          std::vector<std::vector<cv::Point> > draw_contour;
+          draw_contour.push_back(target_contour);
+          cv::drawContours(debug_image, draw_contour, -1, cv::Scalar(255, 255, 255), -1);
+        }
         image_pub_.publish(cv_bridge::CvImage(msg->header, sensor_msgs::image_encodings::MONO8, debug_image).toImageMsg());
       }
 
-      tf2::Vector3 target_obj_uv = calc_position(target_contour);
+      tf2::Vector3 target_obj_uv;
+      if (all_contour_) {
+        cv::Moments contour_moments = cv::moments(src_image, true);
+        tf2::Vector3 pos;
+        target_obj_uv.setX(contour_moments.m10 / contour_moments.m00);
+        target_obj_uv.setY(contour_moments.m01 / contour_moments.m00);
+      } else {
+        target_obj_uv = calc_position(target_contour);
+      }
       target_obj_uv.setZ(1.0);
       tf2::Vector3 object_pos_in_optical_frame = camera_K_inv_ * target_obj_uv * object_distance;
 
