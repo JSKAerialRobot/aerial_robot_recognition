@@ -9,6 +9,7 @@
   <arg name="contour_area_margin" default="0.0"/>
   <arg name="contour_area_min_thre" default="0.1"/>
   <arg name="frame_id" default="target_object"/>
+  <arg name="tf_prefix" default=""/>
   <arg name="h_limit_max" default="33" doc="The maximum allowed field value Hue" />
   <arg name="h_limit_min" default="10" doc="The minimum allowed field value Hue" />
   <arg name="s_limit_max" default="255" doc="The maximum allowed field value Saturation" />
@@ -41,6 +42,7 @@
     <param name="contour_area_min_thre" value="$(arg contour_area_min_thre)"/>
     <param name="debug_view" value="$(arg debug_view)"/>
     <param name="frame_id" value="$(arg frame_id)"/>
+    <param name="tf_prefix" value="$(arg tf_prefix)"/>
   </node>
 
 </launch>

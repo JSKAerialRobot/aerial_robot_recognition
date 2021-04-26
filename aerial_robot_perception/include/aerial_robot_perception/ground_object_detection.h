@@ -85,6 +85,7 @@ namespace aerial_robot_perception
     bool all_contour_;
 
     bool debug_view_;
+    std::string tf_prefix_;
     std::string frame_id_;
 
     double real_size_scale_;

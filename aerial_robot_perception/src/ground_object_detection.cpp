@@ -47,6 +47,7 @@ namespace aerial_robot_perception
     pnh_->param("contour_area_min_thre", contour_area_min_thre, 0.1);
     pnh_->param("object_height", object_height_, 0.05);
     pnh_->param("debug_view", debug_view_, false);
+    pnh_->param("tf_prefix", tf_prefix_, std::string(""));
     pnh_->param("frame_id", frame_id_, std::string("target_object"));
     pnh_->param("all_contour", all_contour_, false);
     always_subscribe_ = true; //because of no subscriber
@@ -174,7 +175,7 @@ namespace aerial_robot_perception
       geometry_msgs::TransformStamped obj_tf_msg;
       obj_tf_msg.header = msg->header;
       obj_tf_msg.header.frame_id = std::string("world");
-      obj_tf_msg.child_frame_id = frame_id_;
+      obj_tf_msg.child_frame_id = tf_prefix_ + frame_id_;
       obj_tf_msg.transform.translation = tf2::toMsg(cam_tf * object_pos_in_optical_frame);
       obj_tf_msg.transform.rotation.w = 1.0;
       tf_br_.sendTransform(obj_tf_msg);
